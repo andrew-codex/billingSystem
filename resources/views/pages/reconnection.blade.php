@@ -115,13 +115,15 @@
                     <div class="avatar">RB</div>
                     <div class="info">
                       <h3>{{$lineman->first_name}}</h3>
-                      <p>ID: LM-003</p>
+                      <p> ID: {{$lineman->id}}</p>
                     </div>
-                    <span class="status available">available</span>
+                   <span class="status {{ $lineman->availability ? 'available' : 'not-available' }}">
+                    {{ $lineman->availability ? 'Available' : 'Not Available' }}
+                  </span>
+
                   </div>
                   <div class="card-body">
                     <div class="row">
-                      <span><strong>Zone</strong><br> District E-F</span>
                       <span><strong>Active Jobs</strong><br> 0</span>
                     </div>
                     <div class="row">
