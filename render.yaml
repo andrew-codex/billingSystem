@@ -80,3 +80,34 @@
 }
 
 
+services:
+  - type: web
+    name: billing-system
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan key:generate --show
+      php artisan migrate --force
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_KEY
+        value: "REPLACE_WITH_YOUR_GENERATED_KEY"
+      - key: APP_ENV
+        value: "production"
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: "https://yourproject.onrender.com"
+      - key: DB_CONNECTION
+        value: "mysql"
+      - key: DB_HOST
+        value: "REPLACE_WITH_DB_HOST"
+      - key: DB_PORT
+        value: "REPLACE_WITH_DB_PORT"
+      - key: DB_DATABASE
+        value: "REPLACE_WITH_DB_NAME"
+      - key: DB_USERNAME
+        value: "REPLACE_WITH_DB_USERNAME"
+      - key: DB_PASSWORD
+        value: "REPLACE_WITH_DB_PASSWORD"
