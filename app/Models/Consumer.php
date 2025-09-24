@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Models;
+use Schoolees\Psgc\Models\Region;
+use Schoolees\Psgc\Models\Province;
+use Schoolees\Psgc\Models\City;
+use Schoolees\Psgc\Models\Barangay;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\ElectricMeter;  
+ 
+class Consumer extends Model
+{
+    use HasFactory;
+
+    protected $appends = ['full_name', 'full_address'];
+    public const STATUS_ACTIVE   = 'active';
+    public const STATUS_INACTIVE = 'inactive';
+    public const STATUS_ARCHIVED = 'archived';
+
+    protected $fillable =[
+        'first_name',
+        'last_name',
+        'middle_name',
+        'suffix',
+        'email',
+        'password',
+        'region_code',
+        'province_code',
+        'city_code',
+        'barangay_code',
+        'street',
+        'phone',
+        'house_type',
+        'status',
+        'must_change_password',
+    ];
+
+    public function electricMeters()
+{
+    return $this->hasMany(ElectricMeter::class);
+}
+
+public function receivedMeters()
+{
+    return $this->hasMany(ElectricMeter::class, 'consumer_id');
+}
+
+
+    public function getFullNameAttribute()
+    {
+        return trim("{$this->first_name} {$this->middle_name} {$this->last_name} {$this->suffix}");
+    }
+
+   
+    public function getFullAddressAttribute()
+    {
+        $barangay = $this->barangay?->name;
+        $city = $this->city?->name;
+        $province = $this->province?->name;
+        $region = $this->region?->name;
+
+        return collect([$barangay, $city, $province, $region])
+            ->filter()
+            ->join(', ');
+    }
+
+       public function region()
+    {
+        return $this->belongsTo(Region::class, 'region_code', 'code');
+    }
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_code', 'code');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_code', 'code');
+    }
+
+    public function barangay()
+    {
+        return $this->belongsTo(Barangay::class, 'barangay_code', 'code');
+    }
+
+}

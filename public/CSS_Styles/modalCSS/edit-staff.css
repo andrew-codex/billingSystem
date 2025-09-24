@@ -1,0 +1,155 @@
+
+.edit-staff {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    font-family: "Inter", sans-serif;
+}
+
+.edit-staff.active {
+    display: flex;
+}
+
+
+.edit-staff .modal-content {
+    background: #1f2937; 
+    padding: 2rem;
+    border-radius: 16px;
+    width: 700px;
+    max-width: 95%;
+    color: #f9fafb;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    position: relative;
+    animation: slideDown 0.3s ease;
+}
+
+
+.edit-staff .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.edit-staff .close-btn:hover {
+    color: #f9fafb;
+}
+
+
+.edit-staff .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+
+.edit-staff .form-columns {
+    display: flex;
+    gap: 4rem;
+    margin-bottom: 1.5rem;
+}
+.edit-staff .form-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.edit-staff .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.edit-staff label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+/* === Inputs === */
+.edit-staff input,
+.edit-staff select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    font-size: 0.95rem;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.edit-staff input:focus,
+.edit-staff select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    outline: none;
+    background: #374151;
+}
+
+/* === Validation === */
+.edit-staff input.invalid,
+.edit-staff select.invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+}
+.edit-staff .error-message {
+    min-height: 16px; /* keeps space reserved */
+    font-size: 0.8rem;
+    color: #ef4444;
+}
+
+/* === Actions === */
+.edit-staff .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.edit-staff .form-actions button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.edit-staff .form-actions button:active {
+    transform: scale(0.97);
+}
+.edit-staff button[type="submit"] {
+    background: #3b82f6;
+    color: white;
+}
+.edit-staff button[type="submit"]:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+.edit-staff .cancel-btn {
+    background: #374151;
+    color: #d1d5db;
+}
+.edit-staff .cancel-btn:hover {
+    background: #4b5563;
+}
+
+/* === Animation === */
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* === Responsive === */
+@media (max-width: 700px) {
+    .edit-staff .form-columns {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

@@ -1,0 +1,183 @@
+.edit-consumer {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
+
+.edit-consumer.active {
+    display: flex;
+}
+
+.edit-consumer .modal-content {
+    max-height: 90vh;
+    background: #1e293b;
+    color: #f8fafc;
+    border-radius: 14px;
+    width: 950px;
+    max-width: 95%;
+    padding: 28px;
+    padding-right: 5px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+    position: relative;
+    animation: fadeIn 0.35s ease-in-out;
+    overflow-y: auto;
+}
+
+.edit-consumer .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s ease;
+}
+.edit-consumer .close-btn:hover {
+    color: #f87171;
+    transform: rotate(90deg);
+}
+
+.edit-consumer .modal-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    border-bottom: 1px solid #2d2f3a;
+    margin-bottom: 1.4rem;
+    padding-bottom: 0.6rem;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.edit-consumer .form-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem 2rem;
+}
+
+.edit-consumer .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-consumer label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.edit-consumer input,
+.edit-consumer textarea{
+    width: 85%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.edit-consumer .select{
+    width: 90%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.edit-consumer input:focus,
+.edit-consumer select:focus,
+.edit-consumer textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    outline: none;
+    background: #374151;
+}
+
+.edit-consumer textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+input.invalid,
+select.invalid,
+textarea.invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+}
+
+.error-message,
+.edit-consumer small.text-danger {
+    font-size: 0.8rem;
+    color: #ef4444;
+}
+.edit-consumer small.text-success {
+    font-size: 0.8rem;
+    color: #22c55e;
+}
+
+.edit-consumer .form-actions {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 1.8rem;
+}
+
+.edit-consumer .form-actions button {
+    padding: 0.7rem 1.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edit-consumer .form-actions button:active {
+    transform: scale(0.97);
+}
+
+.edit-consumer .form-actions .cancel-btn {
+    background: #374151;
+    color: #f9fafb;
+}
+.edit-consumer .form-actions .cancel-btn:hover {
+    background: #4b5563;
+}
+
+.edit-consumer .form-actions .btn-primary {
+    background: #3b82f6;
+    color: #fff;
+}
+.edit-consumer .form-actions .btn-primary:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+@keyframes fadeIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .edit-consumer .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .edit-consumer .form-columns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}

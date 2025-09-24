@@ -1,0 +1,150 @@
+.add-electricMeter{
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.add-electricMeter.active{
+    display: flex;
+}
+
+.add-electricMeter .modal-content {
+    background: #1f2937; 
+    padding: 2rem;
+    border-radius: 16px;
+    width: 400px;
+    max-width: 95%;
+    color: #f9fafb;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    position: relative;
+    animation: slideDown 0.3s ease;
+}
+
+
+.close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.close-btn:hover {
+    color: #f9fafb;
+}
+
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 10px;
+       border-bottom: 1px solid #2d2f3a;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.add-electricMeter input {
+    width: 93%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    font-size: 0.95rem;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.add-electricMeter select{
+    width: 80%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    font-size: 0.95rem;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+
+.add-electricMeter input:focus ,
+.add-electricMeter select:focus
+{
+    border-color: #3b82f6; 
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    outline: none;
+    background: #374151;
+}
+
+
+.error-message,
+.text-danger {
+    min-height: 18px;   
+    font-size: 0.8rem;
+    color: #ef4444;
+    line-height: 1.2;
+    display: block;   
+}
+.text-success {
+    min-height: 18px;
+    font-size: 0.8rem;
+    color: #22c55e; 
+    line-height: 1.2;
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+   justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.form-actions button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.form-actions button:active {
+    transform: scale(0.97);
+}
+.form-actions button[type="submit"] {
+    background: #3b82f6;
+    color: white;
+}
+.form-actions button[type="submit"]:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+.cancel-btn {
+    background: #374151;
+    color: #d1d5db;
+}
+.cancel-btn:hover {
+    background: #4b5563;
+}
+
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

@@ -1,0 +1,142 @@
+body.light-theme {
+    background: #f9f9f9;
+    color: #333;
+    font-family: "Inter", sans-serif;
+}
+.btn-back {
+    margin-left: 270px;
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f1f1f1;
+    color: #333;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-back:hover {
+    background: #e0e0e0;
+    color: #000;
+}
+
+
+.page-wrapper {
+    margin-left: 250px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 20px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #333;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #28c76f;
+    box-shadow: 0 0 4px rgba(40,199,111,0.3);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: #28c76f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-submit:hover {
+    background: #22b163;
+}
+
+.history-item {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-left: 4px solid #28c76f;
+    transition: transform 0.2s ease-in-out;
+}
+
+
+.history-item:hover {
+ transform: translateY(-4px);
+}
+
+
+.tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.tag.transfer {
+    background: #eafaf1;
+    color: #28c76f;
+}
+
+.tag.replacement {
+    background: #fde9ef;
+    color: #e7517a;
+}
+
+.remarks {
+    font-size: 14px;
+    margin: 6px 0;
+    color: #444;
+}
+
+.meta {
+    font-size: 12px;
+    color: #666;
+}
+
+.hidden {
+    display: none;
+}
+
+.back-link {
+    display: inline-block;
+    margin: 15px;
+    color: #28c76f;
+    text-decoration: none;
+    font-weight: bold;
+}
