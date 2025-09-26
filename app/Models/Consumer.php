@@ -26,10 +26,10 @@ class Consumer extends Model
         'suffix',
         'email',
         'password',
-        'region_code',
-        'province_code',
-        'city_code',
-        'barangay_code',
+        'region_name', 'region_code',
+        'province_name', 'province_code',
+        'city_name','city_code',
+        'barangay_name','barangay_code',
         'street',
         'phone',
         'house_type',
@@ -54,36 +54,7 @@ public function receivedMeters()
     }
 
    
-    public function getFullAddressAttribute()
-    {
-        $barangay = $this->barangay?->name;
-        $city = $this->city?->name;
-        $province = $this->province?->name;
-        $region = $this->region?->name;
+ 
 
-        return collect([$barangay, $city, $province, $region])
-            ->filter()
-            ->join(', ');
-    }
-
-       public function region()
-    {
-        return $this->belongsTo(Region::class, 'region_code', 'code');
-    }
-
-    public function province()
-    {
-        return $this->belongsTo(Province::class, 'province_code', 'code');
-    }
-
-    public function city()
-    {
-        return $this->belongsTo(City::class, 'city_code', 'code');
-    }
-
-    public function barangay()
-    {
-        return $this->belongsTo(Barangay::class, 'barangay_code', 'code');
-    }
-
+       
 }

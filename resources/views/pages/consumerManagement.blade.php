@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/base.css')}}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Plugin JS -->
+<script src="https://cdn.jsdelivr.net/npm/philippine-address-selector@latest/dist/philippine-address-selector.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
         <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/consumer.css')}}">
     <title>Consumer & Account Management</title>
 </head>
@@ -90,7 +97,7 @@
                       
                         <td>{{ $consumer->electricMeters->first()->electric_meter_number ?? 'N/A'}}</td>
                        
-                        <td>{{$consumer->full_address}}</td>
+                        <td>{{$consumer->city_name}}</td>
                         <td>
                             @if($consumer->house_type == 'residential')
                              <span class="badge badge-residential">residential</span>
@@ -202,6 +209,9 @@
 
     <script>
 
+
+
+
 function openAssignMeterModal(el) {
     let consumerId = el.getAttribute('data-consumer-id');
     document.getElementById('assign_consumer_id').value = consumerId;
@@ -226,13 +236,39 @@ function closeAssignMeterModal() {
 
 function openEditConsumer(id) {
     const modal = document.getElementById(`edit-consumer-${id}`);
-    const form = modal.querySelector("form");
-
-   
-    form.reset();
-
     modal.style.display = "flex";
+
+    // Correct selectors (dynamic IDs)
+    const $region   = $(`#region-${id}`);
+    const $province = $(`#province-${id}`);
+    const $city     = $(`#city-${id}`);
+    const $barangay = $(`#barangay-${id}`);
+
+    const regionCode   = $region.data("selected");
+    const provinceCode = $province.data("selected");
+    const cityCode     = $city.data("selected");
+    const barangayCode = $barangay.data("selected");
+
+    // Apply in order after plugin populates options
+    if (regionCode) {
+        $region.val(regionCode).trigger("change");
+
+        setTimeout(() => {
+            if (provinceCode) $province.val(provinceCode).trigger("change");
+        }, 400);
+
+        setTimeout(() => {
+            if (cityCode) $city.val(cityCode).trigger("change");
+        }, 800);
+
+        setTimeout(() => {
+            if (barangayCode) $barangay.val(barangayCode).trigger("change");
+        }, 1200);
+    }
 }
+
+
+
 
 function closeEditConsumer(id) {
     document.getElementById(`edit-consumer-${id}`).style.display = "none";

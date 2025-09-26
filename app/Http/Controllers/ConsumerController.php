@@ -14,20 +14,8 @@ use Illuminate\Support\Str;
 
 class ConsumerController extends Controller
 {
-   public function index(Request $request)
+  public function index(Request $request)
 {
-
-   
-     $regions = Cache::rememberForever('regions_all', function () {
-        return DB::table('regions')->orderBy('name')->get();
-    });
-
-    $provinces = Cache::rememberForever('provinces_all', function () {
-        return DB::table('provinces')->orderBy('name')->get();
-    });
-
-
-
     $searchConsumer = trim($request->input('searchConsumer'));
     $status = $request->input('status');
     $house_type = $request->input('house_type');
@@ -37,53 +25,66 @@ class ConsumerController extends Controller
     $meters = ElectricMeter::whereNull('consumer_id')
         ->where('status', 'unassigned')
         ->get();
-   
-    $consumers = Consumer::query()
+
+    // Base query for main consumers
+    $query = Consumer::query()
         ->where('status', '!=', 'archived')
         ->orderBy('created_at', 'desc')
-      
-    
-
-    
         ->when($searchConsumer, function ($query, $searchConsumer) {
             $query->where(function ($q) use ($searchConsumer) {
                 $q->where('id', 'like', "%{$searchConsumer}%")
                   ->orWhere('first_name', 'like', "%{$searchConsumer}%")
                   ->orWhere('last_name', 'like', "%{$searchConsumer}%")
                   ->orWhere('status', 'like', "%{$searchConsumer}%")
-                ->orWhereHas('electricMeters', function ($meterQuery) use ($searchConsumer) {
-                  $meterQuery->where('electric_meter_number', 'like', "%{$searchConsumer}%");
-              });
-                 
+                  ->orWhereHas('electricMeters', function ($meterQuery) use ($searchConsumer) {
+                      $meterQuery->where('electric_meter_number', 'like', "%{$searchConsumer}%");
+                  });
             });
         })
-
-      
         ->when($status && $status !== 'all', function ($query) use ($status) {
             $query->where('status', $status);
         })
-
-   
         ->when($house_type && $house_type !== 'all', function ($query) use ($house_type) {
             $query->where('house_type', $house_type);
-        })
+        });
 
-        ->paginate(5, ['*'], 'page_main');
+    // Paginate the results
+    $consumers = $query->paginate(5, ['*'], 'page_main');
 
+    // Map region/province/city/barangay names
+    $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
+    $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+    $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
+    $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
+
+    $consumers->getCollection()->transform(function($consumer) use ($regions, $provinces, $cities, $barangays) {
+        $region = collect($regions)->firstWhere('region_code', $consumer->region_code);
+        $consumer->region_name = $region['region_name'] ?? $consumer->region_name ?? '';
+
+        $province = collect($provinces)->firstWhere('province_code', $consumer->province_code);
+        $consumer->province_name = $province['province_name'] ?? $consumer->province_name ?? '';
+
+        $city = collect($cities)->firstWhere('city_code', $consumer->city_code);
+        $consumer->city_name = $city['city_name'] ?? $consumer->city_name ?? '';
+
+        $barangay = collect($barangays)->firstWhere('brgy_code', $consumer->barangay_code);
+        $consumer->barangay_name = $barangay['brgy_name'] ?? $consumer->barangay_name ?? '';
+
+        return $consumer;
+    });
+
+    // Archived consumers
     $archivedConsumers = Consumer::where('status', 'archived')
         ->paginate(5, ['*'], 'page_archive');
 
-
-
-
+    // AJAX response
     if ($request->ajax()) {
-        $html = view('pages.consumerManagement', compact('meters', 'consumers', 'archivedConsumers', 'regions', 'provinces'))->render();
+        $html = view('pages.consumerManagement', compact('meters', 'consumers', 'archivedConsumers'))->render();
         return response()->json(['html' => $html]);
     }
 
-    return view('pages.consumerManagement', compact('meters', 'consumers', 'archivedConsumers', 'regions',  'provinces' ));
+    return view('pages.consumerManagement', compact('meters', 'consumers', 'archivedConsumers'));
 }
-
 
 
 
@@ -104,9 +105,13 @@ class ConsumerController extends Controller
             'regex:/^(09\d{9}|\+639\d{9})$/',
         ],
         'region_code' => 'nullable|string|max:255',
+        'region_name' => 'nullable|string|max:255',
+        'province_name' => 'nullable|string|max:255',
         'province_code' => 'nullable|string|max:255',
+        'city_name' => 'nullable|string|max:255',
         'city_code' => 'nullable|string|max:255',
         'barangay_code' => 'nullable|string|max:255',
+        'barangay_name' => 'nullable|string|max:255',
         'street' => 'nullable|string|max:255',
         'installation_date' => 'nullable|date',
         'house_type' => 'nullable|string|in:residential,commercial,industrial',
@@ -122,7 +127,7 @@ class ConsumerController extends Controller
         ],
     ]);
 
-     $plainPassword = Str::random(10); 
+    //  $plainPassword = Str::random(10); 
 
 
     $consumer = Consumer::create([
@@ -131,13 +136,17 @@ class ConsumerController extends Controller
         'middle_name'  => $validated['middle_name'],
         'suffix'  => $validated['suffix'],
         'email'      => $validated['email'],
-       'region_code' => $request->region_code,
+        'region_code' => $request->region_code,
+       'region_name' => $request->region_name,
        'province_code' => $request->province_code,
-       'city_code' => $request->city_code,
+       'province_name' => $request->province_name,
+          'city_code' => $request->city_code,
+       'city_name' => $request->city_name,
         'barangay_code' => $request->barangay_code,
+        'barangay_name' => $request->barangay_name,
          'street' => $validated['street'],
         'phone'      => $validated['phone'] ?? null,
-          'password' => Hash::make($plainPassword),
+        //   'password' => Hash::make($plainPassword),
         'house_type' => $validated['house_type'],
         'installation_date' => $validated['installation_date'],
         'must_change_password' => true,
@@ -151,7 +160,7 @@ class ConsumerController extends Controller
             'installation_date' => $request->installation_date,
         ]);
 
-        Mail::to($consumer->email)->send(new ConsumerWelcome($consumer, $plainPassword));
+        // Mail::to($consumer->email)->send(new ConsumerWelcome($consumer, $plainPassword));
 
     return redirect()->route('consumer.index')
         ->with('success', 'Consumer added successfully with an assigned meter.');
@@ -184,50 +193,79 @@ public function update(Request $request, $id)
 {
     $consumer = Consumer::findOrFail($id);
 
-
     $validated = $request->validate([
         'first_name'   => 'required|string|max:50',
         'last_name'    => 'required|string|max:50',
         'middle_name'  => 'nullable|string|max:50',
-        'suffix' => 'nullable|in:Jr.,Sr.,II,III,IV',
-        'region_code' => 'nullable|string|max:255',
-        'province_code' => 'nullable|string|max:255',
-        'city_code' => 'nullable|string|max:255',
-        'barangay_code' => 'nullable|string|max:255',
-        'street' => 'nullable|string|max:255',
-        'email' => 'required|email|unique:consumers,email',
-        'email'             => 'required|email|unique:consumers,email,' . $consumer->id. ',id',
-        'address'           => 'nullable|string|max:500',
-       'phone' => [
-    'nullable',
-    'regex:/^(09\d{9}|\+639\d{9})$/',
-    'unique:consumers,phone,' . $consumer->id. ',id',
-],
+        'suffix'       => 'nullable|in:Jr.,Sr.,II,III,IV',
 
+        // Address codes (from dropdowns)
+        'region_code'   => 'nullable|string|max:20',
+        'province_code' => 'nullable|string|max:20',
+        'city_code'     => 'nullable|string|max:20',
+        'barangay_code' => 'nullable|string|max:20',
+
+        // Address names (from hidden fields)
+        'region_name'   => 'nullable|string|max:255',
+        'province_name' => 'nullable|string|max:255',
+        'city_name'     => 'nullable|string|max:255',
+        'barangay_name' => 'nullable|string|max:255',
+
+        'street'        => 'nullable|string|max:255',
       
+
+        'email' => 'required|email|unique:consumers,email,' . $consumer->id,
+        'phone' => [
+            'nullable',
+            'regex:/^(09\d{9}|\+639\d{9})$/',
+            'unique:consumers,phone,' . $consumer->id,
+        ],
+
         'installation_date' => 'nullable|date',
-           'house_type'        => 'nullable|in:residential,commercial,industrial',
+        'house_type'        => 'nullable|in:residential,commercial,industrial',
     ]);
 
+    // Load address data
+    $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
+    $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+    $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
+    $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-    $consumer->first_name         = $validated['first_name'];
-    $consumer->last_name         = $validated['last_name'];
-    $consumer->middle_name         = $validated['middle_name'];
-    $consumer->suffix         =    $validated['suffix'];
-    $consumer->email             = $validated['email'];
-    $consumer->region_code =   $validated['region_code'];
-    $consumer->province_code = $validated['province_code'];
-    $consumer->city_code = $validated['city_code'];
-    $consumer->barangay_code = $validated['barangay_code'];
-    $consumer->street = $request->street;
-    $consumer->phone             = $validated['phone'] ?? null;
-    $consumer->house_type        = $validated['house_type']?? null;
+    // Prepare address fields
+    $region_code = $request->region_code;
+    $region_name = collect($regions)->firstWhere('region_code', $region_code)['region_name'] ?? null;
 
+    $province_code = $request->province_code;
+    $province_name = collect($provinces)->firstWhere('province_code', $province_code)['province_name'] ?? null;
 
+    $city_code = $request->city_code;
+    $city_name = collect($cities)->firstWhere('city_code', $city_code)['city_name'] ?? null;
 
-    $consumer->save();
+    $barangay_code = $request->barangay_code;
+    $barangay_name = collect($barangays)->firstWhere('brgy_code', $barangay_code)['brgy_name'] ?? null;
 
-        if ($request->filled('installation_date')) {
+    // Update consumer
+    $consumer->update([
+        'first_name'      => $validated['first_name'],
+        'last_name'       => $validated['last_name'],
+        'middle_name'     => $validated['middle_name'],
+        'suffix'          => $validated['suffix'],
+        'email'           => $validated['email'],
+        'region_code'     => $region_code,
+        'region_name'     => $region_name,
+        'province_code'   => $province_code,
+        'province_name'   => $province_name,
+        'city_code'       => $city_code,
+        'city_name'       => $city_name,
+        'barangay_code'   => $barangay_code,
+        'barangay_name'   => $barangay_name,
+        'street'          => $validated['street'],
+        'phone'           => $validated['phone'] ?? null,
+        'house_type'      => $validated['house_type'] ?? null,
+    ]);
+
+    // Update installation date if exists
+    if ($request->filled('installation_date')) {
         $activeMeter = $consumer->electricMeters()->where('status', 'active')->first();
         if ($activeMeter) {
             $activeMeter->installation_date = $validated['installation_date'];
@@ -237,6 +275,7 @@ public function update(Request $request, $id)
 
     return redirect()->route('consumer.index')->with('success', 'Consumer updated successfully!');
 }
+
 
 public function archived($id){
     $consumer = Consumer::findOrfail($id);

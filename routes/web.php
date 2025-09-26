@@ -54,6 +54,7 @@ Route::get('/psgc/barangays/all', function() {
 
 
 
+
         
         
                 Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
@@ -127,6 +128,15 @@ Route::get('/psgc/barangays/all', function() {
                 Route::get('/reconnection', [ReconnectionController::class, 'index'])->name('reconnection.index');
 
                 Route::post('/linemen', [LineManController::class, 'createLineMan'])->name('linemen.create');
+                Route::post('/linemen/{lineman}/deactivate', [LineManController::class, 'deactivate'])->name('linemen.deactivate');
+                Route::post('/linemen/{lineman}/activate', [LineManController::class, 'activate'])->name('linemen.activate');
+                
+                Route::post('/linemen/{lineman}/on-leave', [LineManController::class, 'onLeave'])->name('linemen.onleave');
+                Route::post('/linemen/{lineman}/back-from-leave', [LineManController::class, 'backFromLeave'])->name('linemen.back_from_leave');
+
+                Route::post('/linemen/{lineman}/archive', [LineManController::class, 'archive'])->name('linemen.archive');
+                Route::get('/linemen/{id}/profile', [App\Http\Controllers\LineManController::class, 'profile'])->name('linemen.profile');
+
 
         });
 

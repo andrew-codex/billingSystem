@@ -10,7 +10,10 @@
 <body>
     @include('includes.sidebar')
     @include('modals.add-lineMan')
-    @include('includes.alerts')
+@include('modals.linemenProfile')
+
+
+  @include('includes.alerts')
 
 <div class="content">
 
@@ -32,7 +35,7 @@
       </div>
       <div class="stat-info">
         <p class="label">PENDING</p>
-        <p class="number">12</p>
+        <p class="number">0</p>
     </div>
 
       
@@ -46,7 +49,7 @@
       </div>
       <div class="stat-info">
         <p class="label">ACTIVE</p>
-        <p class="number">12</p>
+        <p class="number">0</p>
       </div>
     </div>
 
@@ -58,7 +61,7 @@
       </div>
       <div class="stat-info">
         <p class="label">COMPLETED</p>
-        <p class="number">12</p>
+        <p class="number">0</p>
       </div>
      
    
@@ -68,10 +71,12 @@
       <div class="icon-box" style="background: #D1FAE5;  color: #10B981;">
          <i class="fa-solid fa-circle-user"></i>
       </div>
+    
       <div class="stat-info">
         <p class="label">AVAILABLE</p>
-        <p class="number">12</p>
+        <p class="number">{{$availableCount ?? 0}}</p>
       </div>
+ 
       
    
     </div>
@@ -107,54 +112,162 @@
 
          
 
-            <div class="card-grid fade-in">
+                  <div class="card-grid fade-in">
+                      @foreach($linemen as $lineman)
+                          <div class="card">
+                              <div class="card-header">
+                                  @php
+                                      $initials = strtoupper(substr($lineman->first_name, 0, 1) . substr($lineman->last_name, 0, 1));
+                                  @endphp   
+                                  <div class="avatar">{{ $initials }}</div>
+                                  <div class="info">
+                                      <h3>{{$lineman->first_name}}</h3>
+                                      <p> ID: {{$lineman->id}}</p>
+                                  </div>
 
-            @foreach($linemen as $lineman)
-                <div class="card">
-                  <div class="card-header">
-                    <div class="avatar">RB</div>
-                    <div class="info">
-                      <h3>{{$lineman->first_name}}</h3>
-                      <p> ID: {{$lineman->id}}</p>
-                    </div>
-                   <span class="status {{ $lineman->availability ? 'available' : 'not-available' }}">
-                    {{ $lineman->availability ? 'Available' : 'Not Available' }}
-                  </span>
+                                  <span class="status 
+                                      @if($lineman->status === 'inactive') not-available 
+                                      @elseif($lineman->availability) available 
+                                      @else not-available 
+                                      @endif">
+                                      @if($lineman->status === 'inactive')
+                                          Deactivated
+                                      @elseif($lineman->status === 'on_leave')
+                                          On Leave
+                                      @else
+                                          {{ $lineman->availability ? 'Available' : 'Not Available' }}
+                                      @endif
+                                  </span>
 
-                  </div>
-                  <div class="card-body">
-                    <div class="row">
-                      <span><strong>Active Jobs</strong><br> 0</span>
-                    </div>
-                    <div class="row">
-                      <span><strong>Completed Today</strong><br> 3</span>
-                    </div>
-                  </div>
-                  <div class="card-footer">
-                    <button class="btn-outline">View Profile</button>
-                    <button class="btn-primary">Assign Job</button>
-                  </div>
-                </div>
-              </div>
-              @endforeach
+                                  <div class="header-dropdown">
+                                      <button class="header-dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                                      <div class="header-menu">
+                                          @if($lineman->status === 'active')
+                                          
+                                              <form action="{{ route('linemen.deactivate', $lineman->id) }}" method="POST">
+                                                  @csrf
+                                                  <button type="submit" style="color:#ef4444;">
+                                                      <i class="fa-solid fa-user-minus"></i> Deactivate
+                                                  </button>
+                                              </form>
 
-            </div>
-
-
-
-      </div>
-
-
-
+                                  <button type="button" 
+                                      onclick="openEdit({{ $lineman->id }}, {
+                                          region_code: '{{ $lineman->region_code }}',
+                                          province_code: '{{ $lineman->province_code }}',
+                                          city_code: '{{ $lineman->city_code }}',
+                                          barangay_code: '{{ $lineman->barangay_code }}'
+                                      })">
+                                      Edit
+                                  </button>
 
 
 
-   
+
+      
+
+
+
+            <form action="{{ route('linemen.onleave', $lineman->id) }}" method="POST">
+                @csrf
+                <button type="submit" style="color:#f59e0b;">
+                    <i class="fa-solid fa-user-clock"></i> On Leave
+                </button>
+            </form>
+
+        @elseif($lineman->status === 'inactive')
+      
+            <form action="{{ route('linemen.activate', $lineman->id) }}" method="POST">
+                @csrf
+                <button type="submit" style="color:#16a34a;">
+                    <i class="fa-solid fa-user-check"></i> Activate
+                </button>
+            </form>
+
+            <form action="{{ route('linemen.archive', $lineman->id) }}" method="POST">
+                @csrf
+                <button type="submit" style="color:#6b7280;">
+                    <i class="fa-solid fa-archive"></i> Archive
+                </button>
+            </form>
+
+        @elseif($lineman->status === 'on_leave')
+            
+            <form action="{{ route('linemen.back_from_leave', $lineman->id) }}" method="POST">
+                @csrf
+                <button type="submit" style="color:#16a34a;">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Back from Leave
+                </button>
+            </form>
+        @endif
+    </div>
 </div>
 
 
 
+                              </div>
+
+                              <div class="card-body">
+                                  <div class="row">
+                                      <span><strong>Active Jobs</strong><br> 0</span>
+                                  </div>
+                                  <div class="row">
+                                      <span><strong>Completed Today</strong><br> 3</span>
+                                  </div>
+                              </div>
+
+                              <div class="card-footer">
+                                  <button class="btn-outline" onclick="openProfile({{ $lineman->id }})">
+                                      <i class="fa-solid fa-user"></i> View Profile
+                                  </button>
+                                  <button class="btn-primary"><i class="fa-solid fa-briefcase"></i> Assign Job</button>
+                              </div>
+                          </div>
+                      @endforeach
+                  </div>
+
+      </div>
+
+</div>
+
+
+
+
 <script>
+
+function openEdit(id) {
+    document.getElementById('edit-lineman-' + id).classList.add('active');
+    console.log("Editing lineman", linemanId, linemanAddress);
+
+}
+
+function closeEdit(id) {
+    document.getElementById('edit-lineman-' + id).classList.remove('active');
+}
+
+
+
+
+function attachHeaderToggle() {
+    const dropdowns = document.querySelectorAll('.header-dropdown');
+
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.header-dropdown-toggle');
+        const menu = dropdown.querySelector('.header-menu');
+
+        toggle.addEventListener('click', e => {
+            e.stopPropagation();
+            menu.classList.toggle('show');
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.header-menu').forEach(menu => menu.classList.remove('show'));
+    });
+}
+
+document.addEventListener('DOMContentLoaded', attachHeaderToggle);
+
 
   function openAddLineMan(){
     document.querySelector('.line-man-content').classList.add('active');
@@ -178,6 +291,13 @@
       panes[index].classList.add("active");
     });
   });
+
+
+
+
+
+
+
 
 
 

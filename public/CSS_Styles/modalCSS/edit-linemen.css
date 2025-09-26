@@ -1,0 +1,148 @@
+  .edit-lineman {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
+
+.edit-lineman.active {
+    display: flex;
+}
+
+.edit-lineman .modal-content {
+    max-height: 90vh;
+    background: #1e293b;
+    color: #f8fafc;
+    border-radius: 14px;
+    width: 950px;
+    max-width: 95%;
+    padding: 28px 30px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.6);
+    position: relative;
+    animation: fadeIn 0.35s ease-in-out;
+    overflow-y: auto;
+}
+
+.edit-lineman .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s ease;
+}
+.edit-lineman .close-btn:hover {
+    color: #f87171;
+    transform: rotate(90deg);
+}
+
+.edit-lineman .modal-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    border-bottom: 1px solid #2d2f3a;
+    margin-bottom: 1.4rem;
+    padding-bottom: 0.6rem;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.edit-lineman .form-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1rem;
+}
+
+
+.edit-lineman .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-lineman label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.edit-lineman input,
+.edit-lineman select {
+    width: 80%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.edit-lineman input:focus,
+.edit-lineman select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    outline: none;
+    background: #374151;
+}
+
+.edit-lineman .form-actions {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 1.8rem;
+}
+
+.edit-lineman .form-actions button {
+    padding: 0.7rem 1.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edit-lineman .form-actions button:active {
+    transform: scale(0.97);
+}
+
+.edit-lineman .form-actions .cancel-btn {
+    background: #374151;
+    color: #f9fafb;
+}
+.edit-lineman .form-actions .cancel-btn:hover {
+    background: #4b5563;
+}
+
+.edit-lineman .form-actions .btn-primary {
+    background: #3b82f6;
+    color: #fff;
+}
+.edit-lineman .form-actions .btn-primary:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+@keyframes fadeIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .edit-lineman .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    .edit-lineman .form-columns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}

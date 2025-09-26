@@ -1,4 +1,5 @@
   <link rel="stylesheet" href="{{asset('/CSS_Styles/modalCSS/edit-consumer.css')}}">
+  
 
   @foreach($consumers as $consumer)
 <div id="edit-consumer-{{ $consumer->id }}" class="edit-consumer hidden">
@@ -64,39 +65,32 @@
             <div class="address-section">
                 <h3 class="section-title">Address Information</h3>
                 <div class="form-columns">
-                    <div class="form-group">
-                        <label for="region_{{ $consumer->id }}">Region</label>
-                        <select name="region_code" id="region_{{ $consumer->id }}" class="region-select select" data-consumer="{{ $consumer->id }}">
-                            <option value="">-- Select Region --</option>
-                            @foreach ($regions as $region)
-                                <option value="{{ $region->code }}" {{ $consumer->region_code == $region->code ? 'selected' : '' }}>
-                                    {{ $region->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="province_{{ $consumer->id }}">Province</label>
-                        <select name="province_code" id="province_{{ $consumer->id }}" class="select" data-selected="{{ $consumer->province_code ?? '' }}">
-                            <option value="">-- Select Province --</option>
-                        </select>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="city_{{ $consumer->id }}">City / Municipality</label>
-                        <select name="city_code" id="city_{{ $consumer->id }}" class="select" data-selected="{{ $consumer->city_code ?? '' }}">
-                            <option value="">-- Select City --</option>
-                        </select>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="barangay_{{ $consumer->id }}">Barangay</label>
-                        <select name="barangay_code" id="barangay_{{ $consumer->id }}" class="barangay-select select" data-selected="{{ $consumer->barangay_code ?? '' }}">
-                            <option value="">-- Select Barangay --</option>
-                        </select>
-                    </div>
+        <select id="region-{{ $consumer->id }}" name="region_code" class="address-select region-select">
+            <option value="">Loading Regions...</option>
+        </select>
+        <input type="hidden" name="region_name" id="region_name_{{ $consumer->id }}">
 
+        <select id="province-{{ $consumer->id }}" name="province_code" class="address-select province-select">
+            <option value="">Choose Province</option>
+        </select>
+        <input type="hidden" name="province_name" id="province_name_{{ $consumer->id }}">
+
+        <select id="city-{{ $consumer->id }}" name="city_code" class="address-select city-select">
+            <option value="">Choose City</option>
+        </select>
+        <input type="hidden" name="city_name" id="city_name_{{ $consumer->id }}">
+
+        <select id="barangay-{{ $consumer->id }}" name="barangay_code" class="address-select barangay-select">
+            <option value="">Choose Barangay</option>
+        </select>
+        <input type="hidden" name="barangay_name" id="barangay_name_{{ $consumer->id }}">
+
+
+
+                    
                     <div class="form-group">
                         <label for="street_{{ $consumer->id }}">Street</label>
                         <input type="text" name="street" id="street_{{ $consumer->id }}"
@@ -135,89 +129,130 @@
 
 @endforeach
 
+<script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Load all JSON data once
+    let regions = [], provinces = [], cities = [], barangays = [];
+    $.getJSON('/json/region.json', data => { regions = data; initialize(); });
+    $.getJSON('/json/province.json', data => { provinces = data; initialize(); });
+    $.getJSON('/json/city.json', data => { cities = data; initialize(); });
+    $.getJSON('/json/barangay.json', data => { barangays = data; initialize(); });
 
+    function initialize() {
+        if (!regions.length || !provinces.length || !cities.length || !barangays.length) return;
 
-document.addEventListener("DOMContentLoaded", () => {
-    async function loadOptions(url, select, selectedValue = null, placeholder = "-- Select --") {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) return;
+        // Loop over all consumers
+        @foreach($consumers as $consumer)
+        (function() {
+            const id = "{{ $consumer->id }}";
 
-            const data = await res.json();
-            select.innerHTML = `<option value="">${placeholder}</option>`;
+            const $region = $(`#region-${id}`);
+            const $province = $(`#province-${id}`);
+            const $city = $(`#city-${id}`);
+            const $barangay = $(`#barangay-${id}`);
 
-            data.data.forEach(item => {
-                const opt = document.createElement("option");
-                opt.value = item.code;
-                opt.textContent = item.name;
-                if (selectedValue && selectedValue == item.code) opt.selected = true;
-                select.appendChild(opt);
+            const $regionName = $(`#region_name_${id}`);
+            const $provinceName = $(`#province_name_${id}`);
+            const $cityName = $(`#city_name_${id}`);
+            const $barangayName = $(`#barangay_name_${id}`);
+
+            // Saved codes from DB
+            let selectedRegion = "{{ $consumer->region_code }}";
+            let selectedProvince = "{{ $consumer->province_code }}";
+            let selectedCity = "{{ $consumer->city_code }}";
+            let selectedBarangay = "{{ $consumer->barangay_code }}";
+
+            function createOption(value, text, isSelected) {
+                return `<option value="${value}" ${isSelected ? 'selected' : ''}>${text}</option>`;
+            }
+
+            // Populate regions
+            $region.empty();
+            regions.forEach(r => {
+                const isSelected = r.region_code == selectedRegion;
+                $region.append(createOption(r.region_code, r.region_name, isSelected));
+                if (isSelected) $regionName.val(r.region_name);
             });
-        } catch (e) {
-            console.error("Error loading options:", e);
-        }
+
+            // Populate provinces
+            function fillProvinces(regionCode) {
+                $province.empty();
+                $city.empty();
+                $barangay.empty();
+
+                const filtered = provinces.filter(p => p.region_code == regionCode);
+                filtered.forEach(p => {
+                    const isSelected = p.province_code == selectedProvince;
+                    $province.append(createOption(p.province_code, p.province_name, isSelected));
+                    if (isSelected) $provinceName.val(p.province_name);
+                });
+
+                if (selectedProvince) fillCities(selectedProvince);
+            }
+
+            // Populate cities
+            function fillCities(provinceCode) {
+                $city.empty();
+                $barangay.empty();
+
+                const filtered = cities.filter(c => c.province_code == provinceCode);
+                filtered.forEach(c => {
+                    const isSelected = c.city_code == selectedCity;
+                    $city.append(createOption(c.city_code, c.city_name, isSelected));
+                    if (isSelected) $cityName.val(c.city_name);
+                });
+
+                if (selectedCity) fillBarangays(selectedCity);
+            }
+
+            // Populate barangays
+            function fillBarangays(cityCode) {
+                $barangay.empty();
+                const filtered = barangays.filter(b => b.city_code == cityCode);
+                filtered.forEach(b => {
+                    const isSelected = b.brgy_code == selectedBarangay;
+                    $barangay.append(createOption(b.brgy_code, b.brgy_name, isSelected));
+                    if (isSelected) $barangayName.val(b.brgy_name);
+                });
+            }
+
+            // Event listeners
+            $region.on('change', function() {
+                const code = $(this).val();
+                const name = $(this).find('option:selected').text();
+                $regionName.val(name);
+                fillProvinces(code);
+            });
+
+            $province.on('change', function() {
+                const code = $(this).val();
+                const name = $(this).find('option:selected').text();
+                $provinceName.val(name);
+                fillCities(code);
+            });
+
+            $city.on('change', function() {
+                const code = $(this).val();
+                const name = $(this).find('option:selected').text();
+                $cityName.val(name);
+                fillBarangays(code);
+            });
+
+            $barangay.on('change', function() {
+                const name = $(this).find('option:selected').text();
+                $barangayName.val(name);
+            });
+
+            // Initialize cascading selects
+            if (selectedRegion) fillProvinces(selectedRegion);
+
+        })();
+        @endforeach
     }
-
-    document.querySelectorAll(".region-select").forEach(regionSelect => {
-        const consumerId    = regionSelect.dataset.consumer;
-        const provinceSelect = document.getElementById(`province_${consumerId}`);
-        const citySelect     = document.getElementById(`city_${consumerId}`);
-        const barangaySelect = document.getElementById(`barangay_${consumerId}`);
-
-        const provinceSelected = provinceSelect.dataset.selected || null;
-        const citySelected     = citySelect.dataset.selected || null;
-        const barangaySelected = barangaySelect.dataset.selected || null;
-
-(async () => {
-    if (regionSelect.value) {
-        // Provinces
-        await loadOptions(
-            `/psgc/provinces?region_code=${regionSelect.value}`,
-            provinceSelect,
-            provinceSelected,
-            "-- Select Province --"
-        );
-
-        // Cities
-        if (provinceSelected) {
-            await loadOptions(
-                `/psgc/cities?province_code=${provinceSelected}`,
-                citySelect,
-                citySelected,
-                "-- Select City --"
-            );
-        }
-
-        // Barangays
-        if (citySelected) {
-            await loadOptions(
-                `/psgc/barangays?city_code=${citySelected}`,
-                barangaySelect,
-                barangaySelected,
-                "-- Select Barangay --"
-            );
-        }
-    }
-})();
-
-       
-        regionSelect.addEventListener("change", () => {
-            loadOptions(`/psgc/provinces?region_code=${regionSelect.value}`, provinceSelect, null, "-- Select Province --");
-            citySelect.innerHTML = "<option value=''>-- Select City --</option>";
-            barangaySelect.innerHTML = "<option value=''>-- Select Barangay --</option>";
-        });
-
-        provinceSelect.addEventListener("change", () => {
-            loadOptions(`/psgc/cities?province_code=${provinceSelect.value}`, citySelect, null, "-- Select City --");
-            barangaySelect.innerHTML = "<option value=''>-- Select Barangay --</option>";
-        });
-
-        citySelect.addEventListener("change", () => {
-            loadOptions(`/psgc/barangays?city_code=${citySelect.value}`, barangaySelect, null, "-- Select Barangay --");
-        });
-    });
 });
+
+
 
 
 
@@ -263,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(() => setMessage(errorEmail, "Error checking email.", false));
         });
 
-        // ✅ Phone validation
+     
         phoneInput.addEventListener("input", function () {
             const phone = phoneInput.value.trim();
             if (!phone) return setMessage(errorPhone, "", null);

@@ -1,6 +1,18 @@
   <link rel="stylesheet" href="{{ asset('/CSS_Styles/modalCSS/add-consumer.css') }}">
   <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/base.css')}}">
 
+<!-- plugin CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/philippine-address-selector@latest/dist/philippine-address-selector.min.css">
+
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- plugin JS -->
+<script src="https://cdn.jsdelivr.net/npm/philippine-address-selector@latest/dist/philippine-address-selector.min.js"></script>
+
+<script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
+
+
  @include('includes.alerts')
 <div class="add-consumer">
     <div class="modal-content">
@@ -69,33 +81,31 @@
                 <div class="address-section">
                     <h3 class="section-title">Address Information</h3>
                     <div class="form-columns">
-                        <div class="form-group">
-                            <label for="region">Region</label>
-                            <select id="region" name="region_code" class="select">
-                                <option value="">-- Select Region --</option>
-                            </select>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="province">Province</label>
-                            <select id="province" name="province_code" class="select">
-                                <option value="">-- Select Province --</option>
-                            </select>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="city">City / Municipality</label>
-                            <select id="city" name="city_code" class="select">
-                                <option value="">-- Select City --</option>
-                            </select>
-                        </div>
+        <label for="region">Region</label>
+        <select id="region" name="region_code"></select>
+        <input type="hidden" id="region-text" name="region_name">
+   
 
-                        <div class="form-group">
-                            <label for="barangay">Barangay</label>
-                            <select id="barangay" name="barangay_code" class="select">
-                                <option value="">-- Select Barangay --</option>
-                            </select>
-                        </div>
+
+        <label for="province">Province</label>
+        <select id="province" name="province_code"></select>
+        <input type="hidden" id="province-text" name="province_name">
+
+
+        <label for="city">City/Municipality</label>
+        <select id="city" name="city_code"></select>
+        <input type="hidden" id="city-text" name="city_name">
+
+
+  
+        <label for="barangay">Barangay</label>
+        <select id="barangay" name="barangay_code"></select>
+        <input type="hidden" id="barangay-text" name="barangay_name">
+
+
+
 
                         <div class="form-group">
                             <label for="street">Prk/Street</label>
@@ -152,83 +162,34 @@
 
 
 <script>
-
-    const REGIONS = @json($regions);
-    const PROVINCES = @json($provinces);
-
 document.addEventListener("DOMContentLoaded", function () {
-    const regionSelect = document.getElementById("region");
-    const provinceSelect = document.getElementById("province");
-    const citySelect = document.getElementById("city");
-    const barangaySelect = document.getElementById("barangay");
-
-
-    fetch("/psgc/regions/all")
-        .then(res => res.json())
-        .then(regions => {
-            regions.forEach(r => {
-                const opt = document.createElement("option");
-                opt.value = r.code;
-                opt.textContent = r.name;
-                regionSelect.appendChild(opt);
-            });
-        });
-
-    regionSelect.addEventListener("change", function () {
-        provinceSelect.innerHTML = "<option value=''>-- Select Province --</option>";
-        citySelect.innerHTML = "<option value=''>-- Select City --</option>";
-        barangaySelect.innerHTML = "<option value=''>-- Select Barangay --</option>";
-
-        if (!this.value) return;
-
-        fetch(`/psgc/provinces/all?region_code=${this.value}`)
-            .then(res => res.json())
-            .then(provinces => {
-                provinces.forEach(p => {
-                    const opt = document.createElement("option");
-                    opt.value = p.code;
-                    opt.textContent = p.name;
-                    provinceSelect.appendChild(opt);
-                });
-            });
+    // initialize
+    let pas = new PhilippineAddressSelector({
+        region: "#region",
+        province: "#province",
+        city: "#city",
+        barangay: "#barangay"
     });
 
-
-    provinceSelect.addEventListener("change", function () {
-        citySelect.innerHTML = "<option value=''>-- Select City --</option>";
-        barangaySelect.innerHTML = "<option value=''>-- Select Barangay --</option>";
-
-        if (!this.value) return;
-
-        fetch(`/psgc/cities/all?province_code=${this.value}`)
-            .then(res => res.json())
-            .then(cities => {
-                cities.forEach(c => {
-                    const opt = document.createElement("option");
-                    opt.value = c.code;
-                    opt.textContent = c.name;
-                    citySelect.appendChild(opt);
-                });
-            });
+    // listen for changes
+    document.querySelector("#region").addEventListener("change", function() {
+        document.querySelector("#region-text").value = this.options[this.selectedIndex].text;
     });
 
- 
-    citySelect.addEventListener("change", function () {
-        barangaySelect.innerHTML = "<option value=''>-- Select Barangay --</option>";
-        if (!this.value) return;
+    document.querySelector("#province").addEventListener("change", function() {
+        document.querySelector("#province-text").value = this.options[this.selectedIndex].text;
+    });
 
-        fetch(`/psgc/barangays/all?city_code=${this.value}`)
-            .then(res => res.json())
-            .then(barangays => {
-                barangays.forEach(b => {
-                    const opt = document.createElement("option");
-                    opt.value = b.code;
-                    opt.textContent = b.name;
-                    barangaySelect.appendChild(opt);
-                });
-            });
+    document.querySelector("#city").addEventListener("change", function() {
+        document.querySelector("#city-text").value = this.options[this.selectedIndex].text;
+    });
+
+    document.querySelector("#barangay").addEventListener("change", function() {
+        document.querySelector("#barangay-text").value = this.options[this.selectedIndex].text;
     });
 });
+
+    
 
 document.addEventListener("DOMContentLoaded", function () {
     
