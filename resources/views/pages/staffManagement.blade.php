@@ -56,6 +56,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
+                            <th>Address</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -66,6 +67,7 @@
                                 <td><strong>{{ $user->name }}</strong><br><small>ID: {{ $user->id }}</small></td>
                                 <td>{{ $user->email }}</td>
                                 <td><span class="badge badge-staff">{{ $user->role }}</span></td>
+                                <td>{{$user->full_address}}</td>
                                 <td>
                                     @if($user->status == 'active')
                                         <span class="badge badge-active">Active</span>

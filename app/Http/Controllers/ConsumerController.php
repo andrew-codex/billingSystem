@@ -48,10 +48,10 @@ class ConsumerController extends Controller
             $query->where('house_type', $house_type);
         });
 
-    // Paginate the results
+    
     $consumers = $query->paginate(5, ['*'], 'page_main');
 
-    // Map region/province/city/barangay names
+
     $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
     $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
     $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
@@ -73,11 +73,11 @@ class ConsumerController extends Controller
         return $consumer;
     });
 
-    // Archived consumers
+
     $archivedConsumers = Consumer::where('status', 'archived')
         ->paginate(5, ['*'], 'page_archive');
 
-    // AJAX response
+  
     if ($request->ajax()) {
         $html = view('pages.consumerManagement', compact('meters', 'consumers', 'archivedConsumers'))->render();
         return response()->json(['html' => $html]);
@@ -123,7 +123,7 @@ class ConsumerController extends Controller
         ],
     ]);
 
-    //  $plainPassword = Str::random(10); 
+     $plainPassword = Str::random(10); 
 
 
     $consumer = Consumer::create([
@@ -138,7 +138,7 @@ class ConsumerController extends Controller
         'barangay_name' => $request->barangay_name,
          'street' => $validated['street'],
         'phone'      => $validated['phone'] ?? null,
-        //   'password' => Hash::make($plainPassword),
+          'password' => Hash::make($plainPassword),
         'house_type' => $validated['house_type'],
         'installation_date' => $validated['installation_date'],
         'must_change_password' => true,
@@ -152,7 +152,7 @@ class ConsumerController extends Controller
             'installation_date' => $request->installation_date,
         ]);
 
-        // Mail::to($consumer->email)->send(new ConsumerWelcome($consumer, $plainPassword));
+        Mail::to($consumer->email)->send(new ConsumerWelcome($consumer, $plainPassword));
 
     return redirect()->route('consumer.index')
         ->with('success', 'Consumer added successfully with an assigned meter.');

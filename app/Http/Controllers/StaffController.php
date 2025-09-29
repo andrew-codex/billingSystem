@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Mail\StaffWelcome;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 class StaffController extends Controller
 {
 
@@ -56,11 +60,11 @@ class StaffController extends Controller
 
 if ($request->ajax()) {
     if ($request->has('page_archive')) {
-        // Return only the modal table + pagination
+   
         $html = view('modals.archived-staff', compact('archivedUsers'))->render();
         return response()->json(['html' => $html]);
     } else {
-        // Main staff table
+      
         $html = view('pages.staffManagement', compact('users', 'archivedUsers'))->render();
         return response()->json(['html' => $html]);
     }
@@ -83,47 +87,50 @@ if ($request->ajax()) {
 
     
 
-public function storeStaff(Request $request){
-   $request->validate([
-        'name' => 'required',
-        'email' => 'required|unique:users,email',
-        'phone' => 'required|max:12',
-           'city_code' => 'nullable|string|max:255',
-            'city_name' => 'nullable|string|max:255',
-               'barangay_code' => 'nullable|string|max:255',
-            'barangay_name' => 'nullable|string|max:255',
-        'password' => [
-            'required',
-            'string',
-            'regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/'
-        ],
-        'role' => 'required|in:admin,staff'
-    ], [
-     
-        'password.regex' => 'Password must be at least 8 characters, include an uppercase letter, a number, and a special character (@$!%*?&).'
+public function storeStaff(Request $request)
+{
+    $validated = $request->validate([
+        'name'          => 'required',
+        'email'         => 'required|unique:users,email',
+        'phone'         => 'required|max:12',
+        'city_code'     => 'nullable|string|max:255',
+        'city_name'     => 'nullable|string|max:255',
+        'barangay_code' => 'nullable|string|max:255',
+        'barangay_name' => 'nullable|string|max:255',
+        'role'          => 'required|in:admin,staff',
+            'password' => [
+        'required',
+        'string',
+        'min:8',
+        'regex:/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).+$/', 
+        'confirmed'
+    ],
     ]);
 
-        User::Create([
+    $plainPassword = Str::random(8);
 
-           'name' => $request -> name,
-           'email' => $request -> email,
-           'phone' => $request -> phone,
-                  'city_code' => $request->city_code,
-       'city_name' => $request->city_name,
+ 
+    $user = User::create([
+        'name'          => $request->name,
+        'email'         => $request->email,
+        'phone'         => $request->phone,
+        'city_code'     => $request->city_code,
+        'city_name'     => $request->city_name,
         'barangay_code' => $request->barangay_code,
         'barangay_name' => $request->barangay_name,
-           'password' =>  bcrypt($request->password),
-           'role'  => $request ->role ,
-           'status' => 'active',   
-           'archived' => false,    
-        ]);
+        'password'      => Hash::make($plainPassword),
+        'role'          => $validated['role'],   
+        'status'        => 'active',   
+        'archived'      => false,  
+         'must_change_password' => true,  
+    ]);
 
-        
+ 
+    Mail::to($user->email)->send(new StaffWelcome($user, $plainPassword));
 
-       
-        return redirect()->back()->with('success', 'Staff added successfully!');
+    return redirect()->back()->with('success', 'Staff added successfully!');
+}
 
-    }
 
 
 

@@ -17,17 +17,21 @@ use App\Mail\ConsumerWelcome;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RolePermissionController;
-
-
+use App\Http\Controllers\PasswordController;
 use App\Models\Consumer;
 
         Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+
+
 // Route::get('/roles/{role}/permissions', [RolePermissionController::class, 'edit'])->name('role.permissions.edit');
 // Route::post('/roles/{role}/permissions', [RolePermissionController::class, 'update'])->name('role.permissions.update');
+        Route::get('/password/change', [PasswordController::class, 'showChangeForm'])->name('password.change');
+        Route::post('/password/change', [PasswordController::class, 'update'])->name('password.change.update');
 
-        Route::middleware(['auth'])->group(function () {
+        Route::middleware(['auth', 'force.password.change'])->group(function () {
 
 
 

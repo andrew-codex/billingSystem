@@ -18,6 +18,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+        protected $appends = ['full_address'];
     protected $fillable = [
         'name',
         'email',
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'archived',
           'city_name','city_code',
         'barangay_name','barangay_code',
+        'must_change_password'
     ];
 
     /**
@@ -74,5 +76,22 @@ public function hasPermission($permissionName)
         ->where('permissions.name', $permissionName)
         ->exists();
 }
+
+    public function getFullAddressAttribute()
+    {
+       
+        $cities = collect(json_decode(file_get_contents(public_path('json/city.json')), true));
+        $barangays = collect(json_decode(file_get_contents(public_path('json/barangay.json')), true));
+
+        $barangay = $barangays->firstWhere('brgy_code', $this->barangay_code)['brgy_name'] ?? null;
+        $city = $cities->firstWhere('city_code', $this->city_code)['city_name'] ?? null;
+     
+
+        return collect([$barangay, $city])
+            ->filter()
+            ->join(', ');
+    }
+
+ 
 
 }

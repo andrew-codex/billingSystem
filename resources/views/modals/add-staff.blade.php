@@ -60,28 +60,7 @@
                          </div>
 
 
-<div class="form-group password-wrapper">
-    <label for="password">Password</label>
-    <div class="input-container">
-        <input 
-            type="password" 
-            name="password" 
-            id="password" 
-            placeholder="Enter password" 
-            required
-            class="@error('password') invalid @enderror password-input"
-            oninput="toggleEyeVisibility()"
-        >
-        <i 
-            id="eyeIcon" 
-            class="fa-solid fa-eye-slash eye-icon" 
-            onclick="togglePassword()"
-        ></i>
-    </div>
-    @error('password')
-        <p class="error-message">{{ $message }}</p>
-    @enderror 
-</div>
+
 
 
                     <div class="form-group">
