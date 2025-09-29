@@ -26,7 +26,7 @@ class ConsumerController extends Controller
         ->where('status', 'unassigned')
         ->get();
 
-    // Base query for main consumers
+   
     $query = Consumer::query()
         ->where('status', '!=', 'archived')
         ->orderBy('created_at', 'desc')
@@ -104,10 +104,6 @@ class ConsumerController extends Controller
             'unique:consumers,phone',
             'regex:/^(09\d{9}|\+639\d{9})$/',
         ],
-        'region_code' => 'nullable|string|max:255',
-        'region_name' => 'nullable|string|max:255',
-        'province_name' => 'nullable|string|max:255',
-        'province_code' => 'nullable|string|max:255',
         'city_name' => 'nullable|string|max:255',
         'city_code' => 'nullable|string|max:255',
         'barangay_code' => 'nullable|string|max:255',
@@ -136,10 +132,6 @@ class ConsumerController extends Controller
         'middle_name'  => $validated['middle_name'],
         'suffix'  => $validated['suffix'],
         'email'      => $validated['email'],
-        'region_code' => $request->region_code,
-       'region_name' => $request->region_name,
-       'province_code' => $request->province_code,
-       'province_name' => $request->province_name,
           'city_code' => $request->city_code,
        'city_name' => $request->city_name,
         'barangay_code' => $request->barangay_code,
@@ -199,15 +191,12 @@ public function update(Request $request, $id)
         'middle_name'  => 'nullable|string|max:50',
         'suffix'       => 'nullable|in:Jr.,Sr.,II,III,IV',
 
-        // Address codes (from dropdowns)
-        'region_code'   => 'nullable|string|max:20',
-        'province_code' => 'nullable|string|max:20',
+     
+ 
         'city_code'     => 'nullable|string|max:20',
         'barangay_code' => 'nullable|string|max:20',
 
-        // Address names (from hidden fields)
-        'region_name'   => 'nullable|string|max:255',
-        'province_name' => 'nullable|string|max:255',
+
         'city_name'     => 'nullable|string|max:255',
         'barangay_name' => 'nullable|string|max:255',
 
@@ -225,13 +214,13 @@ public function update(Request $request, $id)
         'house_type'        => 'nullable|in:residential,commercial,industrial',
     ]);
 
-    // Load address data
+    
     $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
     $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
     $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
     $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-    // Prepare address fields
+   
     $region_code = $request->region_code;
     $region_name = collect($regions)->firstWhere('region_code', $region_code)['region_name'] ?? null;
 
@@ -244,17 +233,13 @@ public function update(Request $request, $id)
     $barangay_code = $request->barangay_code;
     $barangay_name = collect($barangays)->firstWhere('brgy_code', $barangay_code)['brgy_name'] ?? null;
 
-    // Update consumer
+ 
     $consumer->update([
         'first_name'      => $validated['first_name'],
         'last_name'       => $validated['last_name'],
         'middle_name'     => $validated['middle_name'],
         'suffix'          => $validated['suffix'],
         'email'           => $validated['email'],
-        'region_code'     => $region_code,
-        'region_name'     => $region_name,
-        'province_code'   => $province_code,
-        'province_name'   => $province_name,
         'city_code'       => $city_code,
         'city_name'       => $city_name,
         'barangay_code'   => $barangay_code,
@@ -264,7 +249,7 @@ public function update(Request $request, $id)
         'house_type'      => $validated['house_type'] ?? null,
     ]);
 
-    // Update installation date if exists
+    
     if ($request->filled('installation_date')) {
         $activeMeter = $consumer->electricMeters()->where('status', 'active')->first();
         if ($activeMeter) {

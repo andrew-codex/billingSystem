@@ -29,7 +29,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="archivedTables">
                         @foreach($archivedUsers as $user)
                             <tr>
                                 <td><input type="checkbox" class="user-checkbox" value="{{ $user->id }}"></td>
@@ -57,6 +57,35 @@
                         @endforeach
                     </tbody>
                 </table>
+
+
+<div class="pagination-buttons">
+    <div class="pagination archive-pagination">
+        <div class="results-info">
+            Showing {{ $archivedUsers->firstItem() }} to {{ $archivedUsers->lastItem() }} of {{ $archivedUsers->total() }}
+        </div>
+
+        @if($archivedUsers->lastPage() > 1)
+        <div class="pagination-links">
+            @if ($archivedUsers->onFirstPage())
+                <span class="disabled"><i class="fa-solid fa-chevron-left"></i></span>
+            @else
+                <a href="{{ $archivedUsers->previousPageUrl() }}"><i class="fa-solid fa-chevron-left"></i></a>
+            @endif
+
+            <span class="current-page">{{ $archivedUsers->currentPage() }}</span>
+
+            @if ($archivedUsers->hasMorePages())
+                <a href="{{ $archivedUsers->nextPageUrl() }}"><i class="fa-solid fa-chevron-right"></i></a>
+            @else
+                <span class="disabled"><i class="fa-solid fa-chevron-right"></i></span>
+            @endif
+        </div>
+        @endif
+    </div>
+</div>
+
+
             </div>
         @endif
     </div>
@@ -194,42 +223,63 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     
-    function bindRestoreDelete() {
-        document.querySelectorAll(".restore-btn").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const form = this.closest("form");
-                Swal.fire({
-                    title: "Restore User?",
-                    text: "This user will be restored and reactivated.",
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonColor: "#2563eb",
-                    cancelButtonColor: "#6b7280",
-                    confirmButtonText: "Yes, restore"
-                }).then(result => {
-                    if (result.isConfirmed) form.submit();
-                });
-            });
-        });
-
-        document.querySelectorAll(".delete-btn").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const form = this.closest("form");
-                Swal.fire({
-                    title: "Delete Permanently?",
-                    text: "This action cannot be undone.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#dc2626",
-                    cancelButtonColor: "#6b7280",
-                    confirmButtonText: "Yes, delete"
-                }).then(result => {
-                    if (result.isConfirmed) form.submit();
-                });
-            });
+ document.addEventListener("click", function(e) {
+    if (e.target.closest(".restore-btn")) {
+        e.preventDefault();
+        const form = e.target.closest("form");
+        Swal.fire({
+            title: "Restore User?",
+            text: "This user will be restored and reactivated.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#2563eb",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Yes, restore"
+        }).then(result => {
+            if (result.isConfirmed) form.submit();
         });
     }
 
-    bindRestoreDelete();
+    if (e.target.closest(".delete-btn")) {
+        e.preventDefault();
+        const form = e.target.closest("form");
+        Swal.fire({
+            title: "Delete Permanently?",
+            text: "This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Yes, delete"
+        }).then(result => {
+            if (result.isConfirmed) form.submit();
+        });
+    }
 });
+
+
+
+});
+
+function fetchArchivedUsers(page_archive = 1) {
+    $.ajax({
+        url: "{{ route('staff.index') }}",
+        type: "GET",
+        data: { page_archive: page_archive },
+        success: function(response) {
+            $('#archivedTables').html($(response.html).find('#archivedTables').html());
+            $('.archive-pagination').html($(response.html).find('.archive-pagination').html());
+          
+        }
+    });
+}
+
+$(document).on('click', '.archive-pagination a', function(e) {
+    e.preventDefault();
+    let page_archive = $(this).attr('href').split('page_archive=')[1];
+    fetchArchivedUsers(page_archive);
+     bindRestoreDelete(); 
+});
+
+
 </script>

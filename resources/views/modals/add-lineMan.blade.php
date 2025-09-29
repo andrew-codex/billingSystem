@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="{{ asset('/CSS_Styles/modalCSS/add-lineMan.css') }}">
   <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/base.css')}}">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
+
 <div class="line-man-content">
     <div class="content-modal">
         <button class="close-btn" onclick="closedAddLineMan()"><i class="fa-solid fa-xmark"></i></button>
@@ -52,34 +52,19 @@
                 <h3 class="section-title">Address Information</h3>
                 <div class="form-columns">
 
-                <div class="form-group">
-                    <label>Region</label>
-                       <select id="region" class="form-control"></select>
-    <input type="hidden" name="region_name" id="region-text">
 
-                </div>
 
                 <div class="form-group">
-                      <label>Province</label>
-                        <select id="province" class="form-control"></select>
-    <input type="hidden" name="province_name" id="province-text">
-                    
-                </div>
-
-                <div class="form-group">
-                      <label>City</label>
-                        <select id="city" class="form-control"></select>
-    <input type="hidden" name="city_name" id="city-text">
-
-                    
+                    <label>City</label>
+                    <select id="city" name="city_code" class="select"></select>
+                    <input type="hidden" name="city_name" id="city-text"> 
                 </div>
 
 
                 <div class="form-group">
-                                      <label>Barangay</label>
-                  <select id="barangay" class="form-control"></select>
-    <input type="hidden" name="barangay_name" id="barangay-text">
-                    
+                  <label>Barangay</label>
+                  <select id="barangay" name="barangay_code" class="select"></select>
+                 <input type="hidden" name="barangay_name" id="barangay-text">  
                 </div>
     
 
@@ -100,25 +85,65 @@
 
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+    let cityDropdown = document.querySelector("#city");
+    let barangayDropdown = document.querySelector("#barangay");
 
+    // Clear + set default option
+    function resetDropdown(dropdown, placeholder) {
+        dropdown.innerHTML = `<option selected disabled>${placeholder}</option>`;
+    }
 
+    // Load South Cotabato Cities
+    resetDropdown(cityDropdown, "Choose City/Municipality");
+    resetDropdown(barangayDropdown, "Choose Barangay");
 
-$(document).ready(function () {
+    fetch("/json/city.json")
+        .then(res => res.json())
+        .then(data => {
+            // South Cotabato province_code = 1263 (check province.json)
+            let cities = data.filter(c => c.province_code === "1263");
 
-    $("#region, #province, #city, #barangay").ph_address({
-        region: "#region",
-        province: "#province",
-        city: "#city",
-        barangay: "#barangay",
-        details: {
-            region: "#region-text",
-            province: "#province-text",
-            city: "#city-text",
-            barangay: "#barangay-text"
-        }
+            cities.sort((a, b) => a.city_name.localeCompare(b.city_name));
+
+            cities.forEach(city => {
+                let option = document.createElement("option");
+                option.value = city.city_code;
+                option.textContent = city.city_name;
+                cityDropdown.appendChild(option);
+            });
+        });
+
+    // Load Barangays when City changes
+    cityDropdown.addEventListener("change", function () {
+        let cityCode = this.value;
+        let cityName = this.options[this.selectedIndex].text;
+        document.querySelector("#city-text").value = cityName;
+
+        resetDropdown(barangayDropdown, "Choose Barangay");
+
+        fetch("/json/barangay.json")
+            .then(res => res.json())
+            .then(data => {
+                let barangays = data.filter(b => b.city_code === cityCode);
+
+                barangays.sort((a, b) => a.brgy_name.localeCompare(b.brgy_name));
+
+                barangays.forEach(brgy => {
+                    let option = document.createElement("option");
+                    option.value = brgy.brgy_code;
+                    option.textContent = brgy.brgy_name;
+                    barangayDropdown.appendChild(option);
+                });
+            });
+    });
+
+   
+    barangayDropdown.addEventListener("change", function () {
+        document.querySelector("#barangay-text").value = 
+            this.options[this.selectedIndex].text;
     });
 });
-
 
     document.addEventListener("DOMContentLoaded", function () {
     

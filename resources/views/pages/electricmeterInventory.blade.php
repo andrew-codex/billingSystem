@@ -24,7 +24,7 @@
         </a>
 
         </h2>
-        <button  onclick="openAddMeter()"> <i class="fa-solid fa-plus"></i> Add New Electric Meter</button>
+      
     </header>
 
 

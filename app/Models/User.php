@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -25,7 +26,9 @@ class User extends Authenticatable
         'address',
         'status',
         'role',
-        'archived'
+        'archived',
+          'city_name','city_code',
+        'barangay_name','barangay_code',
     ];
 
     /**
@@ -50,4 +53,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    public function isAdmin()
+{
+    return $this->role === 'admin';
+}
+
+public function isStaff()
+{
+    return $this->role === 'staff';
+}
+
+
+public function hasPermission($permissionName)
+{
+    return \DB::table('role_permission')
+        ->join('permissions', 'permissions.id', '=', 'role_permission.permission_id')
+        ->where('role_permission.role', $this->role)
+        ->where('permissions.name', $permissionName)
+        ->exists();
+}
+
 }

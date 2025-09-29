@@ -10,7 +10,7 @@
 <!-- plugin JS -->
 <script src="https://cdn.jsdelivr.net/npm/philippine-address-selector@latest/dist/philippine-address-selector.min.js"></script>
 
-<script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
+
 
 
  @include('includes.alerts')
@@ -83,26 +83,24 @@
                     <div class="form-columns">
 
 
-        <label for="region">Region</label>
-        <select id="region" name="region_code"></select>
-        <input type="hidden" id="region-text" name="region_name">
-   
+
+            
 
 
-        <label for="province">Province</label>
-        <select id="province" name="province_code"></select>
-        <input type="hidden" id="province-text" name="province_name">
+                    <div class="form-group">
+                            <label for="city">City/Municipality</label>
+                            <select class="select" id="city" name="city_code"></select>
+                            <input type="hidden" id="city-text" name="city_name">
+                    </div>
 
 
-        <label for="city">City/Municipality</label>
-        <select id="city" name="city_code"></select>
-        <input type="hidden" id="city-text" name="city_name">
 
+                    <div class="form-group">
+                            <label for="barangay">Barangay</label>
+                            <select class="select" id="barangay" name="barangay_code"></select>
+                            <input type="hidden" id="barangay-text" name="barangay_name">
+                    </div>
 
-  
-        <label for="barangay">Barangay</label>
-        <select id="barangay" name="barangay_code"></select>
-        <input type="hidden" id="barangay-text" name="barangay_name">
 
 
 
@@ -163,31 +161,67 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // initialize
-    let pas = new PhilippineAddressSelector({
-        region: "#region",
-        province: "#province",
-        city: "#city",
-        barangay: "#barangay"
+    let cityDropdown = document.querySelector("#city");
+    let barangayDropdown = document.querySelector("#barangay");
+
+    // Clear + set default option
+    function resetDropdown(dropdown, placeholder) {
+        dropdown.innerHTML = `<option selected disabled>${placeholder}</option>`;
+    }
+
+    // Load South Cotabato Cities
+    resetDropdown(cityDropdown, "Choose City/Municipality");
+    resetDropdown(barangayDropdown, "Choose Barangay");
+
+    fetch("/json/city.json")
+        .then(res => res.json())
+        .then(data => {
+            // South Cotabato province_code = 1263 (check province.json)
+            let cities = data.filter(c => c.province_code === "1263");
+
+            cities.sort((a, b) => a.city_name.localeCompare(b.city_name));
+
+            cities.forEach(city => {
+                let option = document.createElement("option");
+                option.value = city.city_code;
+                option.textContent = city.city_name;
+                cityDropdown.appendChild(option);
+            });
+        });
+
+    // Load Barangays when City changes
+    cityDropdown.addEventListener("change", function () {
+        let cityCode = this.value;
+        let cityName = this.options[this.selectedIndex].text;
+        document.querySelector("#city-text").value = cityName;
+
+        resetDropdown(barangayDropdown, "Choose Barangay");
+
+        fetch("/json/barangay.json")
+            .then(res => res.json())
+            .then(data => {
+                let barangays = data.filter(b => b.city_code === cityCode);
+
+                barangays.sort((a, b) => a.brgy_name.localeCompare(b.brgy_name));
+
+                barangays.forEach(brgy => {
+                    let option = document.createElement("option");
+                    option.value = brgy.brgy_code;
+                    option.textContent = brgy.brgy_name;
+                    barangayDropdown.appendChild(option);
+                });
+            });
     });
 
-    // listen for changes
-    document.querySelector("#region").addEventListener("change", function() {
-        document.querySelector("#region-text").value = this.options[this.selectedIndex].text;
-    });
-
-    document.querySelector("#province").addEventListener("change", function() {
-        document.querySelector("#province-text").value = this.options[this.selectedIndex].text;
-    });
-
-    document.querySelector("#city").addEventListener("change", function() {
-        document.querySelector("#city-text").value = this.options[this.selectedIndex].text;
-    });
-
-    document.querySelector("#barangay").addEventListener("change", function() {
-        document.querySelector("#barangay-text").value = this.options[this.selectedIndex].text;
+    // Save Barangay name
+    barangayDropdown.addEventListener("change", function () {
+        document.querySelector("#barangay-text").value = 
+            this.options[this.selectedIndex].text;
     });
 });
+
+
+
 
     
 

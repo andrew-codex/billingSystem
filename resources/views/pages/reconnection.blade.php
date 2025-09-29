@@ -11,6 +11,7 @@
     @include('includes.sidebar')
     @include('modals.add-lineMan')
 @include('modals.linemenProfile')
+@include('modals.edit-linemen')
 
 
   @include('includes.alerts')
@@ -91,7 +92,33 @@
 
     <div class="tab-content" >
       <div class="tab-pane active" id="reconnection">
-        <p>Content for Reconnection Requests</p>
+
+        <div class="request-content">
+                <div class="search-wrapper">
+                    <i class="fa fa-search search-icon"></i>
+                    <input type="search" id="searchInput"  placeholder="Search request...">
+                </div>
+
+                <div class="card">
+                
+                        <p>example</p>
+                         <button>Assign</button>
+                  
+                </div>
+
+                <div class="card">
+                  
+                        <p>example</p>
+            <button>Assign</button>
+                </div>
+
+                <div class="card">
+               
+                        <p>example</p>
+                         <button>Assign</button>
+                </div>
+            
+        </div>
       </div>
       <div class="tab-pane" id="linemen">
 
@@ -151,15 +178,7 @@
                                                   </button>
                                               </form>
 
-                                  <button type="button" 
-                                      onclick="openEdit({{ $lineman->id }}, {
-                                          region_code: '{{ $lineman->region_code }}',
-                                          province_code: '{{ $lineman->province_code }}',
-                                          city_code: '{{ $lineman->city_code }}',
-                                          barangay_code: '{{ $lineman->barangay_code }}'
-                                      })">
-                                      Edit
-                                  </button>
+                                              <button style="color:#22c55e;"  onclick="openEdit({{ $lineman->id }})"> <i class="fa-solid fa-pen-to-square"></i> Edit</button>
 
 
 
@@ -233,12 +252,40 @@
 
 
 
+
 <script>
 
 function openEdit(id) {
-    document.getElementById('edit-lineman-' + id).classList.add('active');
-    console.log("Editing lineman", linemanId, linemanAddress);
+    const modal = document.getElementById(`edit-lineman-${id}`).classList.add('active');
+  
 
+
+    const $region   = $(`#region-${id}`);
+    const $province = $(`#province-${id}`);
+    const $city     = $(`#city-${id}`);
+    const $barangay = $(`#barangay-${id}`);
+
+    const regionCode   = $region.data("selected");
+    const provinceCode = $province.data("selected");
+    const cityCode     = $city.data("selected");
+    const barangayCode = $barangay.data("selected");
+
+ 
+    if (regionCode) {
+        $region.val(regionCode).trigger("change");
+
+        setTimeout(() => {
+            if (provinceCode) $province.val(provinceCode).trigger("change");
+        }, 400);
+
+        setTimeout(() => {
+            if (cityCode) $city.val(cityCode).trigger("change");
+        }, 800);
+
+        setTimeout(() => {
+            if (barangayCode) $barangay.val(barangayCode).trigger("change");
+        }, 1200);
+    }
 }
 
 function closeEdit(id) {

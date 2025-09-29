@@ -68,25 +68,22 @@
 
 
 
-        <select id="region-{{ $consumer->id }}" name="region_code" class="address-select region-select">
-            <option value="">Loading Regions...</option>
-        </select>
-        <input type="hidden" name="region_name" id="region_name_{{ $consumer->id }}">
-
-        <select id="province-{{ $consumer->id }}" name="province_code" class="address-select province-select">
-            <option value="">Choose Province</option>
-        </select>
-        <input type="hidden" name="province_name" id="province_name_{{ $consumer->id }}">
-
-        <select id="city-{{ $consumer->id }}" name="city_code" class="address-select city-select">
+<div class="form-group">
+        <label>City</label>
+        <select class="select" id="city-{{ $consumer->id }}" name="city_code" class="address-select city-select">
             <option value="">Choose City</option>
         </select>
         <input type="hidden" name="city_name" id="city_name_{{ $consumer->id }}">
+</div>
 
-        <select id="barangay-{{ $consumer->id }}" name="barangay_code" class="address-select barangay-select">
+<div class="form-group">
+    <label>Barangay</label>
+        <select class="select" id="barangay-{{ $consumer->id }}" name="barangay_code" class="address-select barangay-select">
             <option value="">Choose Barangay</option>
         </select>
         <input type="hidden" name="barangay_name" id="barangay_name_{{ $consumer->id }}">
+</div>
+
 
 
 
@@ -129,37 +126,30 @@
 
 @endforeach
 
-<script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
+
 <script>
+
 document.addEventListener("DOMContentLoaded", function () {
-    // Load all JSON data once
-    let regions = [], provinces = [], cities = [], barangays = [];
-    $.getJSON('/json/region.json', data => { regions = data; initialize(); });
-    $.getJSON('/json/province.json', data => { provinces = data; initialize(); });
+
+    let cities = [], barangays = [];
+
     $.getJSON('/json/city.json', data => { cities = data; initialize(); });
     $.getJSON('/json/barangay.json', data => { barangays = data; initialize(); });
 
     function initialize() {
-        if (!regions.length || !provinces.length || !cities.length || !barangays.length) return;
+        if (!cities.length || !barangays.length) return;
 
-        // Loop over all consumers
         @foreach($consumers as $consumer)
         (function() {
             const id = "{{ $consumer->id }}";
 
-            const $region = $(`#region-${id}`);
-            const $province = $(`#province-${id}`);
             const $city = $(`#city-${id}`);
             const $barangay = $(`#barangay-${id}`);
 
-            const $regionName = $(`#region_name_${id}`);
-            const $provinceName = $(`#province_name_${id}`);
             const $cityName = $(`#city_name_${id}`);
             const $barangayName = $(`#barangay_name_${id}`);
 
-            // Saved codes from DB
-            let selectedRegion = "{{ $consumer->region_code }}";
-            let selectedProvince = "{{ $consumer->province_code }}";
+     
             let selectedCity = "{{ $consumer->city_code }}";
             let selectedBarangay = "{{ $consumer->barangay_code }}";
 
@@ -167,49 +157,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 return `<option value="${value}" ${isSelected ? 'selected' : ''}>${text}</option>`;
             }
 
-            // Populate regions
-            $region.empty();
-            regions.forEach(r => {
-                const isSelected = r.region_code == selectedRegion;
-                $region.append(createOption(r.region_code, r.region_name, isSelected));
-                if (isSelected) $regionName.val(r.region_name);
+         
+            $city.empty().append(createOption('', 'Choose City/Municipality', false));
+            const scCities = cities.filter(c => c.province_code === "1263"); 
+            scCities.sort((a, b) => a.city_name.localeCompare(b.city_name));
+
+            scCities.forEach(c => {
+                const isSelected = c.city_code == selectedCity;
+                $city.append(createOption(c.city_code, c.city_name, isSelected));
+                if (isSelected) $cityName.val(c.city_name);
             });
 
-            // Populate provinces
-            function fillProvinces(regionCode) {
-                $province.empty();
-                $city.empty();
-                $barangay.empty();
-
-                const filtered = provinces.filter(p => p.region_code == regionCode);
-                filtered.forEach(p => {
-                    const isSelected = p.province_code == selectedProvince;
-                    $province.append(createOption(p.province_code, p.province_name, isSelected));
-                    if (isSelected) $provinceName.val(p.province_name);
-                });
-
-                if (selectedProvince) fillCities(selectedProvince);
-            }
-
-            // Populate cities
-            function fillCities(provinceCode) {
-                $city.empty();
-                $barangay.empty();
-
-                const filtered = cities.filter(c => c.province_code == provinceCode);
-                filtered.forEach(c => {
-                    const isSelected = c.city_code == selectedCity;
-                    $city.append(createOption(c.city_code, c.city_name, isSelected));
-                    if (isSelected) $cityName.val(c.city_name);
-                });
-
-                if (selectedCity) fillBarangays(selectedCity);
-            }
-
-            // Populate barangays
+        
             function fillBarangays(cityCode) {
-                $barangay.empty();
-                const filtered = barangays.filter(b => b.city_code == cityCode);
+                $barangay.empty().append(createOption('', 'Choose Barangay', false));
+                const filtered = barangays.filter(b => b.city_code === cityCode);
+                filtered.sort((a, b) => a.brgy_name.localeCompare(b.brgy_name));
+
                 filtered.forEach(b => {
                     const isSelected = b.brgy_code == selectedBarangay;
                     $barangay.append(createOption(b.brgy_code, b.brgy_name, isSelected));
@@ -217,21 +181,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             }
 
-            // Event listeners
-            $region.on('change', function() {
-                const code = $(this).val();
-                const name = $(this).find('option:selected').text();
-                $regionName.val(name);
-                fillProvinces(code);
-            });
+            if (selectedCity) fillBarangays(selectedCity);
 
-            $province.on('change', function() {
-                const code = $(this).val();
-                const name = $(this).find('option:selected').text();
-                $provinceName.val(name);
-                fillCities(code);
-            });
-
+          
             $city.on('change', function() {
                 const code = $(this).val();
                 const name = $(this).find('option:selected').text();
@@ -244,15 +196,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 $barangayName.val(name);
             });
 
-            // Initialize cascading selects
-            if (selectedRegion) fillProvinces(selectedRegion);
-
         })();
         @endforeach
     }
 });
-
-
 
 
 

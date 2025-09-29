@@ -439,3 +439,18 @@ header button:hover{
     outline: 2px solid #93c5fd;
     outline-offset: 2px;
 }
+
+
+.card {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}

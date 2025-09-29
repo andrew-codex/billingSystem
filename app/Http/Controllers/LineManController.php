@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LineMan;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 class LineManController extends Controller
 {
 
@@ -15,10 +15,6 @@ class LineManController extends Controller
              'last_name' => 'required',
              'middle_name' => 'nullable',
              'suffix' => 'nullable',
-              'region_code' => 'nullable|string|max:255',
-            'region_name' => 'nullable|string|max:255',
-             'province_code' => 'nullable|string|max:255',
-            'province_name' => 'nullable|string|max:255',
              'city_code' => 'nullable|string|max:255',
             'city_name' => 'nullable|string|max:255',
                'barangay_code' => 'nullable|string|max:255',
@@ -29,16 +25,16 @@ class LineManController extends Controller
 
              
         ]);
+        
+
+
 
         Lineman::Create([
            'first_name' =>$request->first_name,
            'last_name' =>$request->last_name,
            'middle_name' =>$request->middle_name,
            'suffix' => $request->suffix,
-            'region_code' => $request->region_code,
-        'region_name' => $request->region_name,
-         'province_codes' => $request->province_code,
-        'province_name' => $request->province_name,
+          
          'city_code' => $request->city_code,
         'city_name' => $request->city_name,
          'barangay_code' => $request->barangay_code,
@@ -52,7 +48,7 @@ class LineManController extends Controller
         return redirect()->route('reconnection.index')->with('success', 'Line Man added succesfully. ');
     }
 
-    public function update(Request $request, $id)
+    public function updateLineMan(Request $request, $id)
 {
     $lineman = LineMan::findOrFail($id);
 
@@ -60,18 +56,46 @@ class LineManController extends Controller
         'first_name' => 'required|string|max:50',
         'last_name' => 'required|string|max:50',
         'suffix' => 'nullable|string|max:10',
-        'contact' => 'nullable|string|max:20',
+        'contact_number' => 'nullable|string|max:20',
+       
+             'city_code' => 'nullable|string|max:255',
+            'city_name' => 'nullable|string|max:255',
+               'barangay_code' => 'nullable|string|max:255',
+            'barangay_name' => 'nullable|string|max:255',
         'street' => 'nullable|string|max:255',
-        'status' => 'required|in:active,inactive,on_leave',
+       
     ]);
+
+    
+    $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
+    $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+    $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
+    $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
+
+   
+    $region_code = $request->region_code;
+    $region_name = collect($regions)->firstWhere('region_code', $region_code)['region_name'] ?? null;
+
+    $province_code = $request->province_code;
+    $province_name = collect($provinces)->firstWhere('province_code', $province_code)['province_name'] ?? null;
+
+    $city_code = $request->city_code;
+    $city_name = collect($cities)->firstWhere('city_code', $city_code)['city_name'] ?? null;
+
+    $barangay_code = $request->barangay_code;
+    $barangay_name = collect($barangays)->firstWhere('brgy_code', $barangay_code)['brgy_name'] ?? null;
 
     $lineman->update([
         'first_name' => $request->first_name,
         'last_name' => $request->last_name,
         'suffix' => $request->suffix,
-        'contact' => $request->contact,
+        'contact_number' => $request->contact,
+         'city_code' => $request->city_code,
+        'city_name' => $request->city_name,
+         'barangay_code' => $request->barangay_code,
+        'barangay_name' => $request->barangay_name,
         'street' => $request->street,
-        'status' => $request->status,
+       
     ]);
 
     return redirect()->back()->with('success', 'Line man updated successfully!');

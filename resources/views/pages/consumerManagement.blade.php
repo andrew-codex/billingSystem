@@ -238,7 +238,7 @@ function openEditConsumer(id) {
     const modal = document.getElementById(`edit-consumer-${id}`);
     modal.style.display = "flex";
 
-    // Correct selectors (dynamic IDs)
+
     const $region   = $(`#region-${id}`);
     const $province = $(`#province-${id}`);
     const $city     = $(`#city-${id}`);
@@ -249,7 +249,7 @@ function openEditConsumer(id) {
     const cityCode     = $city.data("selected");
     const barangayCode = $barangay.data("selected");
 
-    // Apply in order after plugin populates options
+ 
     if (regionCode) {
         $region.val(regionCode).trigger("change");
 

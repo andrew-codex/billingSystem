@@ -8,7 +8,7 @@
 
         <h2 class="modal-title">Edit Line Man</h2>
 
-        <form id="editLinemanForm-{{ $lineman->id }}" method="POST" action="">
+        <form id="editLinemanForm-{{ $lineman->id }}" method="POST" action="{{route('lineman.update', $lineman->id)}}">
             @csrf
             @method('PUT')
 
@@ -44,36 +44,22 @@
 
             <h3 class="section-title">Address Information</h3>
             <div class="form-columns">
-<select name="region_code" id="region_{{ $lineman->id }}" class="region-select select">
-    <option value="">-- Select Region --</option>
-    @foreach($regions as $region)
-        <option value="{{ $region->code }}" 
-            {{ $lineman->region_code == $region->code ? 'selected' : '' }}>
-            {{ $region->name }}
-        </option>
-    @endforeach
-</select>
+                
+                <div class="form-group">
+                        <label>City</label>
+                        <select class="select" id="city-{{ $lineman->id }}" name="city_code" class="address-select city-select">
+                            <option value="">Choose City</option>
+                        </select>
+                        <input type="hidden" name="city_name" id="city_name_{{ $lineman->id }}">
+                </div>
 
-
-<select name="province_code" id="province_{{ $lineman->id }}" class="select">
-    <option value="{{ $lineman->province_code }}" selected>
-        {{ $provinceName ?? '-- Select Province --' }}
-    </option>
-</select>
-
-
-<select name="city_code" id="city_{{ $lineman->id }}" class="select">
-    <option value="{{ $lineman->city_code }}" selected>
-        {{ $cityName ?? '-- Select City --' }}
-    </option>
-</select>
-
-
-<select name="barangay_code" id="barangay_{{ $lineman->id }}" class="select">
-    <option value="{{ $lineman->barangay_code }}" selected>
-        {{ $barangayName ?? '-- Select Barangay --' }}
-    </option>
-</select>
+                <div class="form-group">
+                    <label>Barangay</label>
+                        <select class="select" id="barangay-{{ $lineman->id }}" name="barangay_code" class="address-select barangay-select">
+                            <option value="">Choose Barangay</option>
+                        </select>
+                        <input type="hidden" name="barangay_name" id="barangay_name_{{ $lineman->id }}">
+                </div>
                 <div class="form-group">
                     <label for="street_{{ $lineman->id }}">Street / Prk</label>
                     <input type="text" name="street" id="street_{{ $lineman->id }}" value="{{ old('street', $lineman->street) }}">
@@ -82,7 +68,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">Save Changes</button>
-                <button type="button" class="cancel-btn" onclick="closeEdit({{ $lineman->id }})">Cancel</button>
+
             </div>
         </form>
     </div>
@@ -94,37 +80,78 @@
 
 
 
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    function fetchOptions(url, target, selected = null) {
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                let options = `<option value="">-- Select --</option>`;
-                data.forEach(item => {
-                    options += `<option value="${item.code}" ${item.code == selected ? 'selected' : ''}>${item.name}</option>`;
-                });
-                document.getElementById(target).innerHTML = options;
+document.addEventListener("DOMContentLoaded", function () {
+
+    let cities = [], barangays = [];
+
+    $.getJSON('/json/city.json', data => { cities = data; initialize(); });
+    $.getJSON('/json/barangay.json', data => { barangays = data; initialize(); });
+
+    function initialize() {
+        if (!cities.length || !barangays.length) return;
+
+        @foreach($linemen as $lineman)
+        (function() {
+            const id = "{{ $lineman->id }}";
+
+            const $city = $(`#city-${id}`);
+            const $barangay = $(`#barangay-${id}`);
+
+            const $cityName = $(`#city_name_${id}`);
+            const $barangayName = $(`#barangay_name_${id}`);
+
+     
+            let selectedCity = "{{ $lineman->city_code }}";
+            let selectedBarangay = "{{ $lineman->barangay_code }}";
+
+            function createOption(value, text, isSelected) {
+                return `<option value="${value}" ${isSelected ? 'selected' : ''}>${text}</option>`;
+            }
+
+         
+            $city.empty().append(createOption('', 'Choose City/Municipality', false));
+            const scCities = cities.filter(c => c.province_code === "1263"); 
+            scCities.sort((a, b) => a.city_name.localeCompare(b.city_name));
+
+            scCities.forEach(c => {
+                const isSelected = c.city_code == selectedCity;
+                $city.append(createOption(c.city_code, c.city_name, isSelected));
+                if (isSelected) $cityName.val(c.city_name);
             });
+
+        
+            function fillBarangays(cityCode) {
+                $barangay.empty().append(createOption('', 'Choose Barangay', false));
+                const filtered = barangays.filter(b => b.city_code === cityCode);
+                filtered.sort((a, b) => a.brgy_name.localeCompare(b.brgy_name));
+
+                filtered.forEach(b => {
+                    const isSelected = b.brgy_code == selectedBarangay;
+                    $barangay.append(createOption(b.brgy_code, b.brgy_name, isSelected));
+                    if (isSelected) $barangayName.val(b.brgy_name);
+                });
+            }
+
+            if (selectedCity) fillBarangays(selectedCity);
+
+          
+            $city.on('change', function() {
+                const code = $(this).val();
+                const name = $(this).find('option:selected').text();
+                $cityName.val(name);
+                fillBarangays(code);
+            });
+
+            $barangay.on('change', function() {
+                const name = $(this).find('option:selected').text();
+                $barangayName.val(name);
+            });
+
+        })();
+        @endforeach
     }
-
-
-    document.getElementById('region').addEventListener('change', function() {
-        fetchOptions(`/psgc/provinces?region_code=${this.value}`, 'province');
-        document.getElementById('city').innerHTML = `<option value="">-- Select City --</option>`;
-        document.getElementById('barangay').innerHTML = `<option value="">-- Select Barangay --</option>`;
-    });
-
-   
-    document.getElementById('province').addEventListener('change', function() {
-        fetchOptions(`/psgc/cities?province_code=${this.value}`, 'city');
-        document.getElementById('barangay').innerHTML = `<option value="">-- Select Barangay --</option>`;
-    });
-
-
-    document.getElementById('city').addEventListener('change', function() {
-        fetchOptions(`/psgc/barangays?city_code=${this.value}`, 'barangay');
-    });
 });
 </script>
 

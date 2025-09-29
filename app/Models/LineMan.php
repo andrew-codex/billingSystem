@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LineMan extends Model
 {
-      protected $appends = ['full_address'];
+    protected $appends = ['full_address'];
     protected $table = 'linemen';
     protected $fillable = [
         'first_name',
@@ -18,8 +18,6 @@ class LineMan extends Model
         'suffix',
         'contact_number',
         'availability',
-        'region_name', 'region_code',
-        'province_name','provine_code',
         'city_name','city_code',
         'barangay_name','barangay_code',
         'street',
@@ -28,15 +26,19 @@ class LineMan extends Model
 
     public function getFullAddressAttribute()
     {
-        $barangay = $this->barangay?->name;
-        $city = $this->city?->name;
-        $province = $this->province?->name;
-        $region = $this->region?->name;
+        $regions = collect(json_decode(file_get_contents(public_path('json/region.json')), true));
+        $provinces = collect(json_decode(file_get_contents(public_path('json/province.json')), true));
+        $cities = collect(json_decode(file_get_contents(public_path('json/city.json')), true));
+        $barangays = collect(json_decode(file_get_contents(public_path('json/barangay.json')), true));
+
+        $barangay = $barangays->firstWhere('brgy_code', $this->barangay_code)['brgy_name'] ?? null;
+        $city = $cities->firstWhere('city_code', $this->city_code)['city_name'] ?? null;
+        $province = $provinces->firstWhere('province_code', $this->province_code)['province_name'] ?? null;
+        $region = $regions->firstWhere('region_code', $this->region_code)['region_name'] ?? null;
 
         return collect([$barangay, $city, $province, $region])
             ->filter()
             ->join(', ');
     }
-
       
 }

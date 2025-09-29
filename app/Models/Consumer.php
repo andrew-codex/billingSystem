@@ -26,8 +26,6 @@ class Consumer extends Model
         'suffix',
         'email',
         'password',
-        'region_name', 'region_code',
-        'province_name', 'province_code',
         'city_name','city_code',
         'barangay_name','barangay_code',
         'street',

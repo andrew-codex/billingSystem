@@ -1,19 +1,22 @@
-        <?php
+<?php
 
 
-        use App\Http\Controllers\LoginController;
-        use App\Http\Controllers\DashboardController;
-        use App\Http\Controllers\ConsumerController;
-                use App\Http\Controllers\LineManController;
-        use App\Http\Controllers\StaffController;
-        use App\Http\Controllers\ElectricMeterController;
-        use App\Http\Controllers\BrownoutScheduling;
-        use App\Http\Controllers\ReconnectionController;
-        use App\Http\Controllers\ConsumerMeterHistoryController;
-        use Illuminate\Support\Facades\Route;
-        use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ConsumerController;
+use App\Http\Controllers\LineManController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ElectricMeterController;
+use App\Http\Controllers\BrownoutScheduling;
+use App\Http\Controllers\ReconnectionController;
+use App\Http\Controllers\ConsumerMeterHistoryController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ConsumerWelcome;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RolePermissionController;
 
 
 use App\Models\Consumer;
@@ -21,36 +24,13 @@ use App\Models\Consumer;
         Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Route::get('/roles/{role}/permissions', [RolePermissionController::class, 'edit'])->name('role.permissions.edit');
+// Route::post('/roles/{role}/permissions', [RolePermissionController::class, 'update'])->name('role.permissions.update');
 
         Route::middleware(['auth'])->group(function () {
 
 
 
-
-                Route::get('/psgc/regions/all', function() {
-    return DB::table('regions')->orderBy('name')->get();
-});
-
-Route::get('/psgc/provinces/all', function() {
-    $region_code = request()->query('region_code');
-    return DB::table('provinces')
-             ->when($region_code, fn($q) => $q->where('region_code', $region_code))
-             ->orderBy('name')->get();
-});
-
-Route::get('/psgc/cities/all', function() {
-    $province_code = request()->query('province_code');
-    return DB::table('cities')
-             ->when($province_code, fn($q) => $q->where('province_code', $province_code))
-             ->orderBy('name')->get();
-});
-
-Route::get('/psgc/barangays/all', function() {
-    $city_code = request()->query('city_code');
-    return DB::table('barangays')
-             ->when($city_code, fn($q) => $q->where('city_code', $city_code))
-             ->orderBy('name')->get();
-});
 
 
 
@@ -63,7 +43,7 @@ Route::get('/psgc/barangays/all', function() {
 
                 Route::get('/staffIndex',[StaffController::class, 'index'])->name('staff.index');
 
-                Route::post('/addStaff',[StaffController::class,'store'])->name('staff.store');
+                Route::post('/addStaff',[StaffController::class,'storeStaff'])->name('staff.store');
 
                 Route::put('/staffUpdate/{id}', [StaffController::class, 'update'])->name('staff.update');
                 Route::get('/staff/search',[StaffController::class, 'search'])->name('staff.search');
@@ -128,6 +108,7 @@ Route::get('/psgc/barangays/all', function() {
                 Route::get('/reconnection', [ReconnectionController::class, 'index'])->name('reconnection.index');
 
                 Route::post('/linemen', [LineManController::class, 'createLineMan'])->name('linemen.create');
+                Route::put('/linemanUpdate/{id}', [LineManController::class, 'updateLineMan'])->name('lineman.update');
                 Route::post('/linemen/{lineman}/deactivate', [LineManController::class, 'deactivate'])->name('linemen.deactivate');
                 Route::post('/linemen/{lineman}/activate', [LineManController::class, 'activate'])->name('linemen.activate');
                 
@@ -135,7 +116,7 @@ Route::get('/psgc/barangays/all', function() {
                 Route::post('/linemen/{lineman}/back-from-leave', [LineManController::class, 'backFromLeave'])->name('linemen.back_from_leave');
 
                 Route::post('/linemen/{lineman}/archive', [LineManController::class, 'archive'])->name('linemen.archive');
-                Route::get('/linemen/{id}/profile', [App\Http\Controllers\LineManController::class, 'profile'])->name('linemen.profile');
+                Route::get('/linemen/{id}/profile', [LineManController::class, 'profile'])->name('linemen.profile');
 
 
         });

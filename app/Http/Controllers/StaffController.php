@@ -3,56 +3,74 @@
 namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Spatie\Permission\Models\Role;
 class StaffController extends Controller
 {
 
-public function index(Request $request)
-{
-    $role   = $request->input('role', 'all');
-    $status = $request->input('status', 'all');
-    $query  = $request->input('query', '');
+    public function index(Request $request)
+    {
+        $searchUser = trim($request->input('searchUser'));
+        $status     = $request->input('status', 'all'); 
+        $role       = 'staff'; 
+        $pageMain   = $request->input('page_main', 1);
 
-    $users = User::query();
+        $query = User::query()
+            ->where('archived', 0)
+            ->where('role', $role)
+            ->when($status !== 'all', fn($q) => $q->where('status', $status))
+            ->when($searchUser, fn($q) => $q->where(function($q2) use ($searchUser) {
+                $q2->where('name', 'like', "%{$searchUser}%")
+                ->orWhere('email', 'like', "%{$searchUser}%")
+                ->orWhere('status', 'like', "%{$searchUser}%");
+            }))
+            ->orderByDesc('created_at');
 
+        $users = $query->paginate(2, ['*'], 'page_main');
 
-    if (!empty($query)) {
-        $users->where(function ($q) use ($query) {
-            $q->where('name', 'like', "%{$query}%")
-              ->orWhere('email', 'like', "%{$query}%");
+        // Transform JSON location data (optional)
+        $regions   = json_decode(file_get_contents(public_path('json/region.json')), true);
+        $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+        $cities    = json_decode(file_get_contents(public_path('json/city.json')), true);
+        $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
+
+        $users->getCollection()->transform(function($user) use ($regions, $provinces, $cities, $barangays) {
+            $region = collect($regions)->firstWhere('region_code', $user->region_code);
+            $user->region_name = $region['region_name'] ?? $user->region_name ?? '';
+
+            $province = collect($provinces)->firstWhere('province_code', $user->province_code);
+            $user->province_name = $province['province_name'] ?? $user->province_name ?? '';
+
+            $city = collect($cities)->firstWhere('city_code', $user->city_code);
+            $user->city_name = $city['city_name'] ?? $user->city_name ?? '';
+
+            $barangay = collect($barangays)->firstWhere('brgy_code', $user->barangay_code);
+            $user->barangay_name = $barangay['brgy_name'] ?? $user->barangay_name ?? '';
+
+            return $user;
         });
+
+        $archivedUsers = User::where('archived', 1)
+                            ->where('role', 'staff')
+                            ->orderByDesc('created_at')
+                            ->paginate(2, ['*'], 'page_archive');
+
+if ($request->ajax()) {
+    if ($request->has('page_archive')) {
+        // Return only the modal table + pagination
+        $html = view('modals.archived-staff', compact('archivedUsers'))->render();
+        return response()->json(['html' => $html]);
+    } else {
+        // Main staff table
+        $html = view('pages.staffManagement', compact('users', 'archivedUsers'))->render();
+        return response()->json(['html' => $html]);
     }
-
-
-    if ($role !== 'all') {
-        $users->where('role', $role);
-    }
-
-
-    if ($status !== 'all') {
-        $users->where('status', $status);
-    }
-
-   
-    $archivedUsers = User::where('archived', 1)
-                        ->orderByDesc('updated_at')
-                        ->paginate(3);
-
- 
-    $users = $users->where('archived', 0) 
-                   ->paginate(5)
-                   ->withQueryString();
-
-    return view('pages.staffManagement', [
-        'users'        => $users,
-        'archivedUsers'=> $archivedUsers,
-        'query'        => $query,
-        'role'         => $role,
-        'status'       => $status,
-        'page'         => $users->currentPage(),
-        'totalPages'   => $users->lastPage(),
-    ]);
 }
+
+
+
+        return view('pages.staffManagement', compact('users', 'archivedUsers'));
+    }
+
 
 
 
@@ -70,13 +88,16 @@ public function storeStaff(Request $request){
         'name' => 'required',
         'email' => 'required|unique:users,email',
         'phone' => 'required|max:12',
-        'address' => 'required',
+           'city_code' => 'nullable|string|max:255',
+            'city_name' => 'nullable|string|max:255',
+               'barangay_code' => 'nullable|string|max:255',
+            'barangay_name' => 'nullable|string|max:255',
         'password' => [
             'required',
             'string',
             'regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/'
         ],
-        'role' => 'required|in:admin,staff,lineman'
+        'role' => 'required|in:admin,staff'
     ], [
      
         'password.regex' => 'Password must be at least 8 characters, include an uppercase letter, a number, and a special character (@$!%*?&).'
@@ -87,12 +108,19 @@ public function storeStaff(Request $request){
            'name' => $request -> name,
            'email' => $request -> email,
            'phone' => $request -> phone,
-           'address' => $request -> address,
+                  'city_code' => $request->city_code,
+       'city_name' => $request->city_name,
+        'barangay_code' => $request->barangay_code,
+        'barangay_name' => $request->barangay_name,
            'password' =>  bcrypt($request->password),
            'role'  => $request ->role ,
            'status' => 'active',   
            'archived' => false,    
         ]);
+
+        
+
+       
         return redirect()->back()->with('success', 'Staff added successfully!');
 
     }
@@ -120,7 +148,10 @@ public function update(Request $request, $id)
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email,' . $user->id,
         'phone' => 'nullable|string|max:20',
-        'address' => 'nullable|string|max:255',
+       'city_code' => 'nullable|string|max:255',
+            'city_name' => 'nullable|string|max:255',
+               'barangay_code' => 'nullable|string|max:255',
+            'barangay_name' => 'nullable|string|max:255',
         'password' => [
             'nullable',
             'string',
@@ -129,11 +160,25 @@ public function update(Request $request, $id)
         'role' => 'required|in:admin,staff,lineman',
     ]);
 
+    $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
+    $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
+
+   
+
+    $city_code = $request->city_code;
+    $city_name = collect($cities)->firstWhere('city_code', $city_code)['city_name'] ?? null;
+
+    $barangay_code = $request->barangay_code;
+    $barangay_name = collect($barangays)->firstWhere('brgy_code', $barangay_code)['brgy_name'] ?? null;
+
     
     $user->name = $validatedData['name'];
     $user->email = $validatedData['email'];
     $user->phone = $validatedData['phone'] ?? $user->phone;
-    $user->address = $validatedData['address'] ?? $user->address;
+    $user->city_code = $request->city_code;
+    $user->city_name = $request->city_name;
+    $user->barangay_code = $request->barangay_code;
+    $user->barangay_name = $request->barangay_name;
     $user->role = $validatedData['role'];
 
  
@@ -142,6 +187,7 @@ public function update(Request $request, $id)
     }
 
     $user->save();
+    
 
     return redirect()->route('staff.index')->with('success', 'Staff updated successfully.');
 }
@@ -150,45 +196,6 @@ public function update(Request $request, $id)
 
 
 
-public function search(Request $request)
-{
-    $query  = $request->get('query', '');
-    $role   = $request->get('role', 'all');
-    $status = $request->get('status', 'all');
-
-    $users = User::where('role', '!=', 'admin')
-        ->where('archived', 0);
-
-    if ($role !== 'all') {
-        $users->where('role', $role);
-    }
-
-    if ($status !== 'all') {
-        $users->where('status', $status);
-    }
-
-    if ($query) {
-        $users->where(function ($q) use ($query) {
-            $q->where('name', 'like', "%{$query}%")
-              ->orWhere('email', 'like', "%{$query}%")
-              ->orWhere('phone', 'like', "%{$query}%")
-              ->orWhere('address', 'like', "%{$query}%");
-        });
-    }
-
-    $users = $users->paginate(3)->withQueryString();
-
-    if ($request->ajax()) {
-        return response()->json([
-            'data'       => $users->items(),
-            'pagination' => (string) $users->links('pagination::simple-tailwind'),
-            'total'      => $users->total(),  
-            'count'      => $users->count(),   
-        ]);
-    }
-
-    return view('pages.staffManagement', compact('users', 'query', 'role', 'status'));
-}
 
 
 
@@ -212,11 +219,14 @@ public function toggleStatus(Request $request, $id)
     if (in_array($newStatus, ['active', 'inactive', 'leave'])) {
         $user->status = $newStatus;
         $user->save();
-        return response()->json(['success' => true, 'message' => 'Status updated']);
+
+      
+        return redirect()->back()->with('success', 'Status updated successfully!');
     }
 
-    return response()->json(['success' => false, 'message' => 'Invalid status']);
+    return redirect()->back()->with('error', 'Invalid status.');
 }
+
 
 public function archive($id)
 {
@@ -224,11 +234,8 @@ public function archive($id)
     $user->archived = 1;
     $user->save();
 
-    return response()->json([
-        'success' => true,
-        'message' => 'User archived',
-        'user' => $user 
-    ]);
+  
+    return redirect()->back()->with('success', 'User archived successfully!');
 }
 
 
