@@ -23,15 +23,17 @@ header .title{
 
 }
 
+.main-content{
+        padding: 20px;
+}
+
 .header-dropdown {
   position: relative;
   display: inline-block;
 }
 
 
-.main-content{
-        padding: 20px;
-}
+
 
 .dropdown-btn {
   background: none;
@@ -87,6 +89,9 @@ header .title{
 }
 
 
+
+
+
 .dropdown-content a {
   display: flex;
   align-items: center;
@@ -108,6 +113,51 @@ header .title{
 }
 
 
+/* Roles submenu */
+.roles-wrapper {
+  display: block;
+}
+
+.roles-wrapper .roles-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #1e293b;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.roles-wrapper .roles-toggle:hover {
+  background: #f1f5f9;
+}
+
+.roles-wrapper .arrow {
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.roles-list {
+  display: none;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.roles-list li a {
+  display: block;
+  padding: 10px 24px;
+  text-decoration: none;
+  color: #1e293b;
+  font-size: 13px;
+}
+
+.roles-list li a:hover {
+  background: #f9fafb;
+}
 
 
 

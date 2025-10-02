@@ -1,43 +1,53 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\RolePermission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+
 class RolePermissionController extends Controller
 {
     public function edit($role)
-    {
-        $permissions = Permission::all();
+{
+    $permissions = [
+        'manage_staff',
+        'manage_roles',
+        'manage_bills',
+        'approve_payments',
+        'view_reports',
+        'export_reports',
+        'system_settings',
+        'create_bills',
+        'edit_bills',
+        'record_payments',
+        'view_customers'
+    ];
 
-        $rolePermissions = DB::table('role_permission')
-            ->where('role', $role)
-            ->pluck('permission_id')
-            ->toArray();
+    $rolePermission = RolePermission::where('role', $role)->first();
 
-        return view('role_permissions.edit', compact('role', 'permissions', 'rolePermissions'));
-    }
+ 
+        $savedPermissions = $rolePermission ? $rolePermission->permissions : [];
 
-    public function update(Request $request, $role)
-    {
-        $request->validate([
-            'permissions' => 'array'
-        ]);
+    return view('pages.role_permissions.edit', compact('permissions', 'role', 'savedPermissions'));
+}
 
-        DB::table('role_permission')->where('role', $role)->delete();
 
-   
-        if ($request->has('permissions')) {
-            foreach ($request->permissions as $permissionId) {
-                DB::table('role_permission')->insert([
-                    'role' => $role,
-                    'permission_id' => $permissionId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+         public function update(Request $request, $role)
+            {
+                $validated = $request->validate([
+                    'permissions' => 'array'
                 ]);
-            }
-        }
 
-        return redirect()->back()->with('success', 'Permissions updated for role: '.$role);
-    }
+                $permissions = $validated['permissions'] ?? [];
+
+                RolePermission::updateOrCreate(
+                    ['role' => $role],
+                    ['permissions' => $permissions]
+                );
+
+                return redirect()
+                    ->back()
+                    ->with('success', "Permissions updated for {$role}!");
+            }
+
+
 }

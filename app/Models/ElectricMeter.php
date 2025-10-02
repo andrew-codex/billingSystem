@@ -20,7 +20,8 @@ use HasFactory;
         'electric_meter_number',
         'status',
         'consumer_id',
-        'installation_date'
+        'installation_date',
+          'house_type'
     ];
 
 

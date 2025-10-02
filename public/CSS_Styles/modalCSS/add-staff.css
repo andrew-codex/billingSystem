@@ -11,8 +11,13 @@
 .add-staff.active {
     display: flex;
 }
-
+.modal-body {
+    overflow-y: auto;
+    padding-right: 10px; 
+    max-height: calc(90vh - 100px); 
+}
 .add-staff .modal-content {
+    max-height: 90vh;
     background: #1f2937; 
     padding: 2rem 2.5rem;
     border-radius: 18px;
@@ -24,6 +29,24 @@
     animation: slideDown 0.3s ease;
 }
 
+
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    background: #2a2e39;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 
 .close-btn {
     position: absolute;

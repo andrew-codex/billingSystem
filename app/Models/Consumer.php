@@ -30,7 +30,7 @@ class Consumer extends Model
         'barangay_name','barangay_code',
         'street',
         'phone',
-        'house_type',
+      
         'status',
         'must_change_password',
     ];

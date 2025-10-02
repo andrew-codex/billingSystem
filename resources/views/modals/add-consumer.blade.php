@@ -164,19 +164,19 @@ document.addEventListener("DOMContentLoaded", function () {
     let cityDropdown = document.querySelector("#city");
     let barangayDropdown = document.querySelector("#barangay");
 
-    // Clear + set default option
+
     function resetDropdown(dropdown, placeholder) {
         dropdown.innerHTML = `<option selected disabled>${placeholder}</option>`;
     }
 
-    // Load South Cotabato Cities
+
     resetDropdown(cityDropdown, "Choose City/Municipality");
     resetDropdown(barangayDropdown, "Choose Barangay");
 
     fetch("/json/city.json")
         .then(res => res.json())
         .then(data => {
-            // South Cotabato province_code = 1263 (check province.json)
+         
             let cities = data.filter(c => c.province_code === "1263");
 
             cities.sort((a, b) => a.city_name.localeCompare(b.city_name));
@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-    // Load Barangays when City changes
+
     cityDropdown.addEventListener("change", function () {
         let cityCode = this.value;
         let cityName = this.options[this.selectedIndex].text;
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // Save Barangay name
+ 
     barangayDropdown.addEventListener("change", function () {
         document.querySelector("#barangay-text").value = 
             this.options[this.selectedIndex].text;

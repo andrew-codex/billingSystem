@@ -5,85 +5,116 @@
         <button class="close-btn" onclick="closedAddStaff()"><i class="fa-solid fa-xmark"></i></button>
         <h2 class="modal-title">Create a Staff</h2>
 
-        <form id="staffForm" action="{{ route('staff.store') }}" method="POST">
-            @csrf
-            @method('POST')
+        <div class="modal-body">
+            <form id="staffForm" action="{{ route('staff.store') }}" method="POST">
+                @csrf
+                @method('POST')
 
-            @if ($errors->any())
-                <script>
-                    document.addEventListener("DOMContentLoaded", () => {
-                        openAddStaff(false);
-                    });
-                </script>
-            @endif
+                @if ($errors->any())
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            openAddStaff(false);
+                        });
+                    </script>
+                @endif
 
-            <div class="form-columns">
-                <div class="form-column">
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" name="name" id="name" placeholder="Enter name" value="{{ old('name') }}" required>
-                    </div>
+            
+                <div class="form-section">
+                    <h3 class="section-title"> Staff Information</h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="first_name">First Name</label>
+                                <input type="text" name="first_name" placeholder="Enter first name" 
+                                    value="{{ old('first_name') }}" required>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="staff-email">Email</label>
-                        <input type="email" id="staff-email" name="email" placeholder="Enter email" required
-                            class="@error('email') invalid @enderror" value="{{ old('email') }}">
-                        <small id="email-error" class="error-message">
-                            @error('email') {{ $message }} @enderror
-                        </small>
-                    </div>
+                            <div class="form-group">
+                                <label for="last_name">Last Name</label>
+                                <input type="text" name="last_name" placeholder="Enter last name" 
+                                    value="{{ old('last_name') }}" required>
+                            </div>
 
+                            <div class="form-group">
+                                <label for="middle_name">Middle Name</label>
+                                <input type="text" name="middle_name" placeholder="Enter middle name" 
+                                    value="{{ old('middle_name') }}">
+                            </div>
 
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="text" name="phone" id="phone"  placeholder="09XXXXXXXXX" value="{{ old('phone') }}" 
-                            class="@error('phone') invalid @enderror" required>
-                        @error('phone')
-                            <p class="error-message">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="form-column">
-                        <div class="form-group">
-                            <label for="city">City/Municipality</label>
-                            <select class="select" id="city" name="city_code"></select>
-                            <input type="hidden" id="city-text" name="city_name">
+                            <div class="form-group">
+                                <label for="suffix">Suffix</label>
+                                <select name="suffix" class="select">
+                                    <option value="">-- None --</option>
+                                    <option value="Jr.">Jr.</option>
+                                    <option value="Sr.">Sr.</option>
+                                    <option value="II">II</option>
+                                    <option value="III">III</option>
+                                    <option value="IV">IV</option>
+                                </select>
+                            </div>
                         </div>
 
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" name="email" placeholder="Enter email"
+                                    class="@error('email') invalid @enderror" value="{{ old('email') }}" required>
+                                <small class="error-message">@error('email') {{ $message }} @enderror</small>
+                            </div>
 
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="text" name="phone" placeholder="09XXXXXXXXX" 
+                                    value="{{ old('phone') }}" class="@error('phone') invalid @enderror" required>
+                                @error('phone')
+                                    <p class="error-message">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                         <div class="form-group">
-                            <label for="barangay">Barangay</label>
-                            <select class="select" id="barangay" name="barangay_code"></select>
-                            <input type="hidden" id="barangay-text" name="barangay_name">
-                         </div>
-
-
-
-
-
-                    <div class="form-group">
-                        <label for="role">Role</label>
-                        <select name="role" id="role" class="@error('role') invalid @enderror">
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
-                            
-                        </select>
-                        @error('role')
-                            <p class="error-message">{{ $message }}</p>
-                        @enderror
+                            <div class="form-group">
+                                <label for="role">Role</label>
+                                <select name="role" class="@error('role') invalid @enderror">
+                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
+                                </select>
+                                @error('role')
+                                    <p class="error-message">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-actions">
-               
-                <button type="submit">Add Staff</button>
-            </div>
-        </form>
+             
+                <div class="form-section">
+                    <h3 class="section-title"> Address Information</h3>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="city">City/Municipality</label>
+                                <select class="select" id="city" name="city_code"></select>
+                                <input type="hidden" id="city-text" name="city_name">
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="barangay">Barangay</label>
+                                <select class="select" id="barangay" name="barangay_code"></select>
+                                <input type="hidden" id="barangay-text" name="barangay_name">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+              
+                <div class="form-actions">
+                    <button type="submit">Add Staff</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
 
 <script>
 
@@ -91,19 +122,19 @@ document.addEventListener("DOMContentLoaded", function () {
     let cityDropdown = document.querySelector("#city");
     let barangayDropdown = document.querySelector("#barangay");
 
-    // Clear + set default option
+
     function resetDropdown(dropdown, placeholder) {
         dropdown.innerHTML = `<option selected disabled>${placeholder}</option>`;
     }
 
-    // Load South Cotabato Cities
+
     resetDropdown(cityDropdown, "Choose City/Municipality");
     resetDropdown(barangayDropdown, "Choose Barangay");
 
     fetch("/json/city.json")
         .then(res => res.json())
         .then(data => {
-            // South Cotabato province_code = 1263 (check province.json)
+           
             let cities = data.filter(c => c.province_code === "1263");
 
             cities.sort((a, b) => a.city_name.localeCompare(b.city_name));
@@ -116,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-    // Load Barangays when City changes
+
     cityDropdown.addEventListener("change", function () {
         let cityCode = this.value;
         let cityName = this.options[this.selectedIndex].text;

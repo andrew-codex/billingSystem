@@ -75,33 +75,33 @@ public function transferOrReplace(Request $request, ElectricMeter $meter)
     ]);
        } else {
                $oldMeterNo = $meter->electric_meter_number;
-$newMeter = ElectricMeter::where('electric_meter_number', $request->new_meter_no)->first();
+            $newMeter = ElectricMeter::where('electric_meter_number', $request->new_meter_no)->first();
 
-if (!$newMeter) {
-    return back()->withErrors(['new_meter_no' => 'Invalid meter selected.']);
-}
-
-
-$newMeter->update([
-    'consumer_id'       => $meter->consumer_id,
-    'status'            => 'active',
-    'installation_date' => now(),
-]);
+            if (!$newMeter) {
+                return back()->withErrors(['new_meter_no' => 'Invalid meter selected.']);
+            }
 
 
-$meter->update([
-    'status'   => 'damaged',
-    'end_date' => now(),
-]);
+            $newMeter->update([
+                'consumer_id'       => $meter->consumer_id,
+                'status'            => 'active',
+                'installation_date' => now(),
+            ]);
 
-ConsumerMeterHistory::create([
-    'consumer_id'      => $meter->consumer_id,
-    'meter_id'         => $meter->id,
-    'transaction_type' => 'replacement',
-    'start_date'       => now(),
-    'remarks'          => "Replaced meter {$oldMeterNo} with {$newMeter->electric_meter_number}",
-    'changed_by'       => auth()->id(),
-]);
+
+            $meter->update([
+                'status'   => 'damaged',
+                'end_date' => now(),
+            ]);
+
+            ConsumerMeterHistory::create([
+                'consumer_id'      => $meter->consumer_id,
+                'meter_id'         => $meter->id,
+                'transaction_type' => 'replacement',
+                'start_date'       => now(),
+                'remarks'          => "Replaced meter {$oldMeterNo} with {$newMeter->electric_meter_number}",
+                'changed_by'       => auth()->id(),
+            ]);
 
 
             }
@@ -111,6 +111,41 @@ ConsumerMeterHistory::create([
 
             return redirect()->route('consumer.index')->with('success', 'Operation completed successfully.');
         }
+
+
+
+        public function assignMeter(Request $request, Consumer $consumer)
+            {
+                $request->validate([
+                    'meter_id' => 'required|exists:electric_meters,id',
+                      'house_type' => 'required|in:residential,commercial,industrial',
+                ]);
+
+                $meter = ElectricMeter::findOrFail($request->meter_id);
+
+
+                $meter->update([
+                    'consumer_id'       => $consumer->id,
+                    'status'            => 'active',
+                  'house_type'        => $request->house_type,
+                    'installation_date' => now(),
+                ]);
+
+                 
+
+
+            
+                ConsumerMeterHistory::create([
+                    'consumer_id'      => $consumer->id,
+                    'meter_id'         => $meter->id,
+                    'transaction_type' => 'assignment',
+                    'start_date'       => now(),
+                    'remarks'          => "Assigned meter {$meter->electric_meter_number} to {$consumer->full_name} (ID {$consumer->id})",
+                    'changed_by'       => auth()->id(),
+                ]);
+
+                return redirect()->back()->with('success', 'Meter assigned successfully.');
+            }
 
 
 

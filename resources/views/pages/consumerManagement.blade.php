@@ -7,11 +7,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<!-- Plugin JS -->
 <script src="https://cdn.jsdelivr.net/npm/philippine-address-selector@latest/dist/philippine-address-selector.min.js"></script>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
         <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/consumer.css')}}">
     <title>Consumer & Account Management</title>
@@ -80,7 +77,7 @@
                         <th>Consumer</th>
                         <th>Meter Number</th>
                         <th>Address</th>
-                        <th>Type</th>
+                        <th>Last Reading</th>
                         <th>Status</th>
                         <th>Actions</th>
                     
@@ -98,15 +95,8 @@
                         <td>{{ $consumer->electricMeters->first()->electric_meter_number ?? 'N/A'}}</td>
                        
                         <td>{{$consumer->city_name}}</td>
-                        <td>
-                            @if($consumer->house_type == 'residential')
-                             <span class="badge badge-residential">residential</span>
-                            @elseif($consumer->house_type == 'commercial')
-                              <span class="badge badge-commercial">commercial</span>
-                            @elseif($consumer->house_type == 'industrial')
-                              <span class="badge badge-industrial">industrial</span>
-                            @endif
-                        </td>
+
+                        <td>0 kWh</td>
                         <td>
                             @if($consumer->status == 'active')
                             <span class="badge badge-active">Active</span>
@@ -136,12 +126,11 @@
                                             </a>
                                         @endif
 
-                                        <a href="javascript:void(0);" 
-                                        class="dropdown-item" 
-                                        data-consumer-id="{{ $consumer->id }}" 
-                                        onclick="openAssignMeterModal(this)">
-                                        <i class="fa fa-bolt"></i> Assign New Meter
-                                        </a>
+                                 
+                                     
+
+                                         <button type="button" onclick="openAssignModal({{ $consumer->id }})">   <i class="fa fa-bolt"></i>  Assign Meter</button>
+                                     
                                     
                                 </div>
                             </div>
@@ -212,14 +201,17 @@
 
 
 
-function openAssignMeterModal(el) {
-    let consumerId = el.getAttribute('data-consumer-id');
+function openAssignModal(consumerId) {
+    const form = document.getElementById('assignMeterForm');
+    form.action = `/consumers/${consumerId}/assign-meter`;
+
+  
     document.getElementById('assign_consumer_id').value = consumerId;
-    document.getElementById('assignMeterForm').action = `/consumers/${consumerId}/assign-meter`;
+
     document.getElementById('assignMeterModal').style.display = 'block';
 }
 
-function closeAssignMeterModal() {  
+function closeAssignMeterModal() {
     document.getElementById('assignMeterModal').style.display = 'none';
 }
 

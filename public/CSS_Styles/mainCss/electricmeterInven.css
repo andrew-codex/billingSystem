@@ -189,6 +189,35 @@ table tbody tr:last-child td {
 }
 
 
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.badge-residential {
+    background-color: #e8f5e9;
+    color: #2e7d32; 
+    border: 1px solid #a5d6a7;
+}
+
+.badge-commercial {
+    background-color: #e3f2fd;
+    color: #1565c0; 
+    border: 1px solid #90caf9;
+}
+
+.badge-industrial {
+    background-color: #fff3e0; 
+    color: #ef6c00; 
+    border: 1px solid #ffcc80;
+}
+
+
 
 
 

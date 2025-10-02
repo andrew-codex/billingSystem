@@ -7,6 +7,7 @@
         <h2>Assign New Meter</h2>
 
         <form id="assignMeterForm" method="POST">
+
             @csrf
             <input type="hidden" name="consumer_id" id="assign_consumer_id">
 

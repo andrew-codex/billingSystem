@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\RolePermission;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,9 +18,12 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-        protected $appends = ['full_address'];
+    protected $appends = ['full_address'];
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name' ,
+        'middle_name',
+        'suffix',
         'email',
         'password',
         'phone',
@@ -57,25 +60,20 @@ class User extends Authenticatable
     }
 
 
-    public function isAdmin()
-{
-    return $this->role === 'admin';
-}
-
-public function isStaff()
-{
-    return $this->role === 'staff';
-}
 
 
-public function hasPermission($permissionName)
-{
-    return \DB::table('role_permission')
-        ->join('permissions', 'permissions.id', '=', 'role_permission.permission_id')
-        ->where('role_permission.role', $this->role)
-        ->where('permissions.name', $permissionName)
-        ->exists();
-}
+public function hasPermission($permission)
+    {
+        $rolePermission = RolePermission::where('role', $this->role)->first();
+
+        if (!$rolePermission) {
+            return false;
+        }
+
+        
+        return in_array($permission, $rolePermission->permissions ?? []);
+    }
+
 
     public function getFullAddressAttribute()
     {

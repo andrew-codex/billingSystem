@@ -90,7 +90,10 @@ if ($request->ajax()) {
 public function storeStaff(Request $request)
 {
     $validated = $request->validate([
-        'name'          => 'required',
+        'first_name'          => 'nullable',
+        'last_name'              => 'nullable',
+        'middle_name'          => 'nullable',
+        'suffix'        => 'nullable',
         'email'         => 'required|unique:users,email',
         'phone'         => 'required|max:12',
         'city_code'     => 'nullable|string|max:255',

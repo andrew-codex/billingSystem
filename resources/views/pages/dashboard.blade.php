@@ -17,37 +17,43 @@
                  <i class="fa-solid fa-gauge"></i> Dashboard Overview
             </a>
             </h2>
-                    <div class="header-dropdown">
-                      <div class="dropdown">
-                       
+                <div class="header-dropdown">
+                    <div class="dropdown">
                         <button class="dropdown-btn">
                         <i class="fa-solid fa-circle-user"></i>
                         </button>
+
                         <div class="dropdown-content">
                         <a href="#"><i class="fa-solid fa-user-gear"></i> Settings</a>
+
                         <div class="history-wrapper">
                             <a href="javascript:void(0);" class="history-toggle">
-                                <i class="fa-solid fa-clock"></i> Transaction History
+                            <i class="fa-solid fa-clock"></i> Transaction History
                             </a>
-
                             <ul class="history-list" style="display: none;">
-                                @forelse($recentHistories as $history)
-                                    <li>
-                                        <strong>{{ $history->meter->electric_meter_number ?? 'N/A' }}</strong>
-                                        assigned to <strong>{{ $history->consumer->full_name ?? 'Unknown' }}</strong>
-                                        by <strong>{{ $history->changedBy->name ?? 'System' }}</strong>
-                                        <span class="history-date">{{ $history->created_at->format('M d, Y H:i') }}</span>
-                                    </li>
-                                @empty
-                                    <li>No recent history available.</li>
-                                @endforelse
-                                <li><a href="" class="view-all">View All</a></li>
+                            <li>No recent history available.</li>
+                            <li><a href="" class="view-all">View All</a></li>
                             </ul>
                         </div>
+
+                    
+                        <div class="roles-wrapper">
+                            <a href="javascript:void(0);" class="roles-toggle">
+                            <i class="fa-solid fa-users-gear"></i> Edit Permissions
+                            <span class="arrow">▾</span>
+                            </a>
+                            <ul class="roles-list">
+                            <li><a href="{{ route('permissions.edit', 'admin') }}">Edit Admin</a></li>
+                            <li><a href="{{ route('permissions.edit', 'staff') }}">Edit Staff</a></li>
+                            </ul>
+                        </div>
+
                         <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         </div>
-                      </div>
                     </div>
+                    </div>
+
+
         </header>
 
    
@@ -143,6 +149,19 @@ document.addEventListener("DOMContentLoaded", () => {
     menu.classList.remove("show");
   });
 });
+
+
+
+document.querySelectorAll('.roles-toggle').forEach(toggle => {
+  toggle.addEventListener('click', (e) => {
+    e.preventDefault();       
+    e.stopPropagation();      
+
+    const submenu = toggle.nextElementSibling;
+    submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+  });
+});
+
 
 
 

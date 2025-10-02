@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/base.css')}}">
     <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/transferForm.css')}}">
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <title>Transfer Form</title>
 </head>
 <body class="dark-theme">
@@ -19,7 +28,7 @@
     <div class="card form-card">
    
         <h2 class="card-title"> <i class="fa-solid fa-bolt"></i> Transfer Meter #{{ $meter->electric_meter_number ?? $meter->id }}</h2>
-        <p class="subtitle">Select an action to proceed with the meter transfer</p>
+        <p class="subtitle">Select an action to proceed </p>
 
         <form action="{{ route('meters.transferOrReplace', $meter->id) }}" method="POST">
             @csrf
@@ -28,20 +37,21 @@
                 <label for="mode">Choose Action</label>
                 <select name="mode" id="mode" class="form-control" required onchange="toggleFields()">
                     <option value="">-- Select --</option>
-                    <option value="transfer">Transfer Responsibility</option>
+                    <option value="transfer">Transfer </option>
                     <option value="replacement">Replace Meter</option>
                 </select>
             </div>
 
             <div id="transferFields" class="form-group hidden">
                 <label for="consumer_id">Select New Consumer</label>
-                <select name="consumer_id" id="consumer_id" class="form-control">
+                <select name="consumer_id" id="consumer_id" class="form-control select2">
                     <option value="">-- Choose Consumer --</option>
                     @foreach($consumers as $consumer)
                         <option value="{{ $consumer->id }}">{{ $consumer->full_name }}</option>
                     @endforeach
                 </select>
             </div>
+
 
             <div id="replacementFields" class="form-group hidden">
                 <label for="new_meter_no">Select Replacement Meter</label>
@@ -93,6 +103,15 @@ function toggleFields() {
     document.getElementById('transferFields').classList.toggle('hidden', mode !== 'transfer');
     document.getElementById('replacementFields').classList.toggle('hidden', mode !== 'replacement');
 }
+
+
+$(document).ready(function() {
+    $('#consumer_id').select2({
+        placeholder: "-- Choose Consumer --",
+        allowClear: true,
+        width: '100%'  
+    });
+});
 </script>
 
 </body>

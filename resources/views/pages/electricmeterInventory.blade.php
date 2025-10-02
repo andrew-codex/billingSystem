@@ -24,6 +24,7 @@
         </a>
 
         </h2>
+         <button  onclick="openAddMeter()"> <i class="fa-solid fa-plus"></i> Register New Electric Meter</button>
       
     </header>
 
@@ -50,7 +51,7 @@
                 <div class="header-dropdown">
                     <button class="header-ropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                     <div class="header-menu">
-                        <button onclick="openArchivedMeter()"><i class="fa-solid fa-box-archive"></i> Archived List</button>
+                        <button onclick="openAddMeter()"><i class="fa-solid fa-box-archive"></i> Archived List</button>
                     </div>
                 </div>
         </div>
@@ -64,6 +65,7 @@
                         <th>Consumer ID</th>
                         <th>Meter Number</th>
                         <th>Date added</th>
+                        <th>House Type</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr> 
@@ -75,6 +77,19 @@
                         <td>{{ $meter->consumer_id }}</td>
                         <td>{{ $meter->electric_meter_number }}</td>
                         <td>{{ $meter->created_at->format('M d, Y') }}</td>
+@php
+$houseType = strtolower($meter->house_type);
+@endphp
+
+<td>
+    @if($houseType == 'residential')
+        <span class="badge badge-residential">residential</span>
+    @elseif($houseType == 'commercial')
+        <span class="badge badge-commercial">commercial</span>
+    @elseif($houseType == 'industrial')
+        <span class="badge badge-industrial">industrial</span>
+    @endif
+</td>
                      
                         <td>
                             @if($meter->status == 'active')
