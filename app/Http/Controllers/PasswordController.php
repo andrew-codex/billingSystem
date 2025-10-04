@@ -8,15 +8,24 @@ use Illuminate\Http\Request;
 class PasswordController extends Controller
 {
 
-    public function showChangeForm()
+public function showChangeForm()
 {
-    if (!auth()->user()->must_change_password) {
+ 
+    $user = auth()->user();
+    if (!$user) {
+        return redirect()->route('login')
+            ->with('error', 'You must be logged in to access this page.');
+    }
+
+    
+    if (!$user->must_change_password) {
         return redirect()->route('dashboard.index')
             ->with('info', 'You already changed your password.');
     }
 
-    return view('/auth/force-change-password ');
+    return view('auth.force-change-password'); 
 }
+
 
 
 

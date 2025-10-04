@@ -7,25 +7,24 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    font-family: "Inter", sans-serif;
 }
 
 .edit-staff.active {
     display: flex;
 }
-
-
 .edit-staff .modal-content {
-    background: #1f2937; 
-    padding: 2rem;
-    border-radius: 16px;
-    width: 700px;
+    max-height: 90vh;
+    background: #1f2937;
+    padding: 2rem 2.5rem;
+    border-radius: 18px;
+    width: 650px;
     max-width: 95%;
     color: #f9fafb;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
     position: relative;
     animation: slideDown 0.3s ease;
 }
+
 
 
 .edit-staff .close-btn {

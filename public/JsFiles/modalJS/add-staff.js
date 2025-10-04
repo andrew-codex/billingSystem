@@ -38,114 +38,90 @@ function closedAddStaff() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("staffForm");
     const emailInput = document.getElementById("staff-email");
-    const passwordInput = form.querySelector("input[name='password']");
     const phoneInput = document.getElementById("phone");
     const emailError = document.getElementById("email-error");
+    const phoneError = document.getElementById("phone-error");
+    const form = document.getElementById("staffForm");
 
-    function showError(input, message) {
-        let group = input.closest(".form-group");
-        let errorMsg = group.querySelector(".error-message");
-        if (!errorMsg) {
-            errorMsg = document.createElement("p");
-            errorMsg.classList.add("error-message");
-            group.appendChild(errorMsg);
-        }
-        errorMsg.textContent = message;
+    function showError(input, errorElement, message) {
         input.classList.add("invalid");
+        errorElement.textContent = message;
+        errorElement.style.color = "red";
     }
 
-    function clearError(input) {
-        const group = input.closest(".form-group");
-        const errorMsg = group.querySelector(".error-message");
-        if (errorMsg && errorMsg.id !== "email-error") errorMsg.remove();
+    function clearError(input, errorElement) {
         input.classList.remove("invalid");
+        errorElement.textContent = "";
     }
 
-    function validateInput(input) {
-        const value = input.value.trim();
-        clearError(input);
+    function validatePhone() {
+        const value = phoneInput.value.trim();
+        phoneInput.value = value.replace(/\D/g, "").slice(0, 11);
 
-        
-        if (input === emailInput) {
-            if (value === "") {
-                emailError.textContent = "";
-                input.classList.remove("invalid");
-                return false;
-            }
-               
-
-            const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!pattern.test(value)) {
-                emailError.textContent = "Please enter a valid email address.";
-                emailError.style.color = "red";
-                input.classList.add("invalid");
-                return false;
-            }
-
-            fetch(`/staff/check-email?email=${encodeURIComponent(value)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.available) {
-                        emailError.textContent = "Email already exists.";
-                        emailError.style.color = "red";
-                        input.classList.add("invalid");
-                    } else {
-                        emailError.textContent = "";
-                        input.classList.remove("invalid");
-                    }
-                })
-                .catch(() => {
-                    emailError.textContent = "Error checking email.";
-                    emailError.style.color = "red";
-                    input.classList.add("invalid");
-                });
+        if (phoneInput.value === "") {
+            clearError(phoneInput, phoneError);
+            return false;
         }
 
-     
-        if (input === passwordInput) {
-            if (value === "") return true; 
-
-            const pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-            if (!pattern.test(value)) {
-                showError(
-                    input,
-                    "Password must be at least 8 characters, include an uppercase letter, a number, and a special character (@$!%*?&)."
-                );
-                return false;
-            }
+        const pattern = /^[0-9]{10,11}$/;
+        if (!pattern.test(phoneInput.value)) {
+            showError(phoneInput, phoneError, "Must be 09XXXXXXXXX.");
+            return false;
         }
 
-        if (input === phoneInput) {
-            if (value === "") return true; 
-
-            const pattern = /^[0-9]+$/;
-            if (!pattern.test(value)) {
-                showError(input, "Phone number must contain only digits.");
-                return false;
-            }
-        }
-
+        clearError(phoneInput, phoneError);
         return true;
     }
 
-   
-    phoneInput.addEventListener("input", () => {
-        phoneInput.value = phoneInput.value.replace(/\D/g, "");
-        validateInput(phoneInput);
-    });
+    let emailTimeout;
+    async function validateEmail() {
+        const value = emailInput.value.trim();
+        clearError(emailInput, emailError);
 
-    [emailInput, passwordInput, phoneInput].forEach(input => {
-        input.addEventListener("blur", () => validateInput(input));
-        input.addEventListener("input", () => validateInput(input));
-    });
+        if (value === "") {
+            showError(emailInput, emailError, "Email is required.");
+            return false;
+        }
 
-    form.addEventListener("submit", e => {
-        let valid = true;
-        [emailInput, passwordInput, phoneInput].forEach(input => {
-            if (!validateInput(input)) valid = false;
+        const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!pattern.test(value)) {
+            showError(emailInput, emailError, "Please enter a valid email address.");
+            return false;
+        }
+
+        if (emailTimeout) clearTimeout(emailTimeout);
+        return new Promise(resolve => {
+            emailTimeout = setTimeout(() => {
+                fetch(`/staff/check-email?email=${encodeURIComponent(value)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.available) {
+                            showError(emailInput, emailError, "Email already exists.");
+                            resolve(false);
+                        } else {
+                            clearError(emailInput, emailError);
+                            resolve(true);
+                        }
+                    })
+                    .catch(() => {
+                        showError(emailInput, emailError, "Error checking email.");
+                        resolve(false);
+                    });
+            }, 500); 
         });
-        if (!valid) e.preventDefault();
+    }
+
+    emailInput.addEventListener("input", validateEmail);
+    phoneInput.addEventListener("input", validatePhone);
+
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+        const emailValid = await validateEmail();
+        const phoneValid = validatePhone();
+
+        if (emailValid && phoneValid) {
+            form.submit();
+        }
     });
 });

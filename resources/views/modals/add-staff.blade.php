@@ -55,22 +55,27 @@
                         </div>
 
                         <div class="form-column">
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" name="email" placeholder="Enter email"
-                                    class="@error('email') invalid @enderror" value="{{ old('email') }}" required>
-                                <small class="error-message">@error('email') {{ $message }} @enderror</small>
-                            </div>
+                            
+                        <div class="form-group">
+                            <label for="staff-email">Email</label>
+                            <input type="email" id="staff-email" name="email" placeholder="Enter email"
+                                class="@error('email') invalid @enderror" value="{{ old('email') }}" required>
+                            <small id="email-error" class="error-message">
+                                @error('email') {{ $message }} @enderror
+                            </small>
+                        </div>
+
 
                             <div class="form-group">
                                 <label for="phone">Phone</label>
-                                <input type="text" name="phone" placeholder="09XXXXXXXXX" 
-                                    value="{{ old('phone') }}" class="@error('phone') invalid @enderror" required>
-                                @error('phone')
-                                    <p class="error-message">{{ $message }}</p>
-                                @enderror
+                                <input type="text" id="phone" name="phone" placeholder="09XXXXXXXXX"
+                                    class="@error('phone') invalid @enderror" value="{{ old('phone') }}" required>
+                                <small id="phone-error" class="error-message">
+                                    @error('phone') {{ $message }} @enderror
+                                </small>
                             </div>
 
+                            
                             <div class="form-group">
                                 <label for="role">Role</label>
                                 <select name="role" class="@error('role') invalid @enderror">
@@ -115,7 +120,7 @@
     </div>
 </div>
 
-
+<script src="{{asset('/JsFiles/modalJS/add-staff.js')}}"></script>
 <script>
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -171,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // Save Barangay name
+
     barangayDropdown.addEventListener("change", function () {
         document.querySelector("#barangay-text").value = 
             this.options[this.selectedIndex].text;
@@ -180,34 +185,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-function toggleEyeVisibility() {
-    const passwordInput = document.getElementById("password");
-    const eyeIcon = document.getElementById("eyeIcon");
 
-    if (passwordInput.value.trim() !== "") {
-        eyeIcon.style.display = "block";
-    } else {
-        eyeIcon.style.display = "none";
-        passwordInput.type = "password"; 
-        eyeIcon.classList.remove("fa-eye");
-        eyeIcon.classList.add("fa-eye-slash");
-    }
-}
 
-function togglePassword() {
-    const passwordInput = document.getElementById("password");
-    const eyeIcon = document.getElementById("eyeIcon");
-
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        eyeIcon.classList.remove("fa-eye-slash");
-        eyeIcon.classList.add("fa-eye");
-    } else {
-        passwordInput.type = "password";
-        eyeIcon.classList.remove("fa-eye");
-        eyeIcon.classList.add("fa-eye-slash");
-    }
-}
 </script>
 
-<script src="{{asset('/JsFiles/modalJS/add-staff.js')}}"></script>
+

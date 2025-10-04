@@ -64,7 +64,7 @@
                     <tr>
                         <th>Consumer ID</th>
                         <th>Meter Number</th>
-                        <th>Date added</th>
+                        <th>Installation Date</th>
                         <th>House Type</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -76,7 +76,13 @@
                     <tr> 
                         <td>{{ $meter->consumer_id }}</td>
                         <td>{{ $meter->electric_meter_number }}</td>
-                        <td>{{ $meter->created_at->format('M d, Y') }}</td>
+                        <td>
+                            {{ $meter->installation_date 
+                                ? $meter->installation_date->timezone('Asia/Manila')->format('M d, Y') 
+                                : '-' 
+                            }}
+                        </td>
+
 @php
 $houseType = strtolower($meter->house_type);
 @endphp

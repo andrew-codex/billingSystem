@@ -5,7 +5,10 @@
    
     <div class="profile-section">
         <img src="{{ asset('/images/user-logo.jpg') }}" alt="Profile Picture" class="profile-img">
-        <h4 class="profile-name">Admin</h4>
+        <h4 class="profile-name">
+           {{ auth()->user() ? auth()->user()->first_name : 'Guest' }}
+       </h4>
+
     </div>
 
     <ul class="menu-list">

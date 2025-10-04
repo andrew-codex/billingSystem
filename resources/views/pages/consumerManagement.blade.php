@@ -71,79 +71,86 @@
         
         
         <div class="consumer-table-wrapper">
-            <table class="consumer-table">
-                <thead>
-                    <tr>
-                        <th>Consumer</th>
-                        <th>Meter Number</th>
-                        <th>Address</th>
-                        <th>Last Reading</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    
-                    </tr>
-                </thead>
-                <tbody id="consumersTables">
+<table class="consumer-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Consumer</th>
+            <th>Meter Number</th>
+            <th>Address</th>
+            <th>Last Reading</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($consumers as $consumer)
+       
+        <tr class="consumer-row">
+            <td class="accordion-cell">
+                <button class="accordion-toggle" onclick="toggleMeters({{ $consumer->id }}, this)">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+            </td>
+            <td>
+                <div class="consumer-info">
+                    <strong>{{ $consumer->full_name }}</strong><br>
+                    <small>ID: {{ $consumer->id }}</small>
+                </div>
+            </td>
+            <td>-</td>
+            <td>{{ $consumer->city_name }}</td>
+            <td>-</td>
+            <td>
+                <span class="badge {{ $consumer->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
+                    {{ ucfirst($consumer->status) }}
+                </span>
+            </td>
+            <td>
+                @if($consumer->status == 'inactive')
+                <div class="menu-dropdown">
+                    <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                    <div class="header-menu">
+                        <button style="color:#22c55e;" onclick="openEditConsumer({{ $consumer->id }})">  <i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <form action="{{ route('consumer.archived', $consumer->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" style="color:#ef4444;"> <i class="fa-solid fa-user-minus"></i> Archive</button>
+                        </form>
+                        <button onclick="openAssignModal({{ $consumer->id }})"><i class="fa fa-bolt"></i> Assign Meter</button>
+                    </div>
+                </div>
+                @endif
+            </td>
+        </tr>
 
-                    @foreach($consumers as $consumer)
-                    <tr>
-                        <td>
-                           <strong>{{ $consumer->full_name }}</strong><br>
-                            <small>ID: {{$consumer-> id}}</small>
-                        </td>
-                      
-                        <td>{{ $consumer->electricMeters->first()->electric_meter_number ?? 'N/A'}}</td>
-                       
-                        <td>{{$consumer->city_name}}</td>
+      
+        @foreach($consumer->electricMeters as $meter)
+        <tr class="meter-row child-of-{{ $consumer->id }}" style="display:none;">
+            <td></td>
+            <td>{{ $consumer->full_name }}</td>
+            <td>{{ $meter->electric_meter_number }}</td>
+            <td>{{ $consumer->city_name }}</td>
+            <td>{{ $meter->last_reading ?? '0 kWh' }}</td>
+            <td>
+                <span class="badge {{ $meter->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
+                    {{ ucfirst($meter->status) }}
+                </span>
+            </td>
+            <td>
+                @if($meter->status == 'active')
+                <a href="{{ route('meters.transfer.form', $meter->id) }}" class="action-link">Transfer/Replace</a>
+                @endif
+            </td>
+        </tr>
+        @endforeach
+        @endforeach
+    </tbody>
+</table>
 
-                        <td>0 kWh</td>
-                        <td>
-                            @if($consumer->status == 'active')
-                            <span class="badge badge-active">Active</span>
-                            @elseif($consumer->status == 'inactive')
-                            <span class=" badge badge-inactive" >Disconnected</span>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="menu-dropdown">
-                                <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                <div class="header-menu">
-                                 
-                                     <button style="color:#22c55e;"  onclick="openEditConsumer({{ $consumer->id }})"> <i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                     <form action="{{route('consumer.archived', $consumer->id)}}" method="POST">
-                                           @csrf
-                                        @method('PUT')
-                                        <button type="submit" style="color:#ef4444;"><i class="fa-solid fa-user-minus"></i> Archive</button>
-                                     </form>
-                                  
-                                        @php
-                                            $activeMeter = $consumer->electricMeters->where('status', 'active')->first();
-                                        @endphp
 
-                                        @if($activeMeter)
-                                            <a href="{{ route('meters.transfer.form', $activeMeter->id) }}" class="btn btn-sm btn-warning">
-                                                <i class="fa fa-exchange"></i> Transfer/Replace
-                                            </a>
-                                        @endif
 
-                                 
-                                     
-
-                                         <button type="button" onclick="openAssignModal({{ $consumer->id }})">   <i class="fa fa-bolt"></i>  Assign Meter</button>
-                                     
-                                    
-                                </div>
-                            </div>
-                        </td>
-                        
-                    </tr>
-     
-
-                    @endforeach
-             
-                </tbody>
  
-            </table>
             <div id="editModalsWrapper">
                 @foreach($consumers as $consumer)
                     @include('modals.edit-consumer', ['consumer' => $consumer])
@@ -275,6 +282,19 @@ function closeEditConsumer(id) {
             document.querySelector(".archived-consumer").classList.remove('active');
         }
 
+
+
+
+function toggleMeters(consumerId, btn) {
+    const rows = document.querySelectorAll(`.child-of-${consumerId}`);
+    const isExpanded = btn.classList.contains("active");
+
+    rows.forEach(row => {
+        row.style.display = isExpanded ? "none" : "table-row";
+    });
+
+    btn.classList.toggle("active");
+}
 
 
 

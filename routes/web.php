@@ -112,6 +112,7 @@ Route::post('/consumers/{consumer}/assign-meter', [ConsumerMeterHistoryControlle
                 
 
                 Route::get('/brownoutSched', [BrownoutScheduling::class, 'index'])->name('BrownoutScheduling.index');
+                Route::post('/storeSchedule', [BrownoutScheduling::class, 'storeSchedule'])->name('store.schedule');
                 Route::get('/reconnection', [ReconnectionController::class, 'index'])->name('reconnection.index');
 
                 Route::post('/linemen', [LineManController::class, 'createLineMan'])->name('linemen.create');

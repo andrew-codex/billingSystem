@@ -35,6 +35,9 @@ use HasFactory;
     {
         return $this->hasMany(ConsumerMeterHistory::class, 'meter_id');
     }
+protected $casts = [
+    'installation_date' => 'datetime',
+];
 
 
 }

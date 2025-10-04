@@ -9,7 +9,8 @@
 </head>
 <body>
   @include('includes.sidebar')
-
+  @include('modals.add-scheduleBrownout')
+  @include('includes.alerts')
   <div class="content">
 
        <header>
@@ -84,5 +85,27 @@
     </div>
 
   </div>
+
+
+  <script>
+  
+function openAddSchedule() {
+  document.querySelector(".brownout-overlay").classList.add('active');
+}
+
+function closeModal() {
+  document.querySelector(".brownout-overlay").classList.remove('active');
+}
+
+
+window.onclick = function(e) {
+  const modal = document.getElementById("brownoutModal");
+  if (e.target === modal) {
+    closeModal();
+  }
+}
+
+
+  </script>
 </body>
 </html>

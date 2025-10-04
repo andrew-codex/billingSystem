@@ -64,7 +64,7 @@
                     <tbody id="staffTables">
                         @foreach($users as $user)
                             <tr>
-                                <td><strong>{{ $user->name }}</strong><br><small>ID: {{ $user->id }}</small></td>
+                                <td><strong>{{ $user->first_name }}</strong><br><small>ID: {{ $user->id }}</small></td>
                                 <td>{{ $user->email }}</td>
                                 <td><span class="badge badge-staff">{{ $user->role }}</span></td>
                                 <td>{{$user->full_address}}</td>
@@ -241,9 +241,28 @@ function openEditStaff(id) {
     }
 }
 
-function closeEditStaff(id) { 
-    document.getElementById(`edit-staff-${id}`).classList.remove('active'); 
+function closeEditStaff(id) {
+    const modal = document.getElementById(`edit-staff-${id}`);
+    const form = document.getElementById(`editStaffForm-${id}`);
+
+
+    form.reset();
+
+   
+    form.querySelectorAll(".error-message").forEach(el => {
+        el.textContent = "";
+    });
+
+ 
+    form.querySelectorAll(".invalid").forEach(el => el.classList.remove("invalid"));
+
+
+
+  
+    modal.classList.remove('active');
 }
+
+
 
 function openArchivedStaff() { document.querySelector(".archived-modal").classList.add('active'); }
 function closeArchivedStaff() { document.querySelector(".archived-modal").classList.remove('active'); }

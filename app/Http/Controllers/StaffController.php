@@ -8,6 +8,8 @@ use App\Mail\StaffWelcome;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 class StaffController extends Controller
 {
 
@@ -31,18 +33,13 @@ class StaffController extends Controller
 
         $users = $query->paginate(2, ['*'], 'page_main');
 
-        // Transform JSON location data (optional)
-        $regions   = json_decode(file_get_contents(public_path('json/region.json')), true);
-        $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+   
+
         $cities    = json_decode(file_get_contents(public_path('json/city.json')), true);
         $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-        $users->getCollection()->transform(function($user) use ($regions, $provinces, $cities, $barangays) {
-            $region = collect($regions)->firstWhere('region_code', $user->region_code);
-            $user->region_name = $region['region_name'] ?? $user->region_name ?? '';
-
-            $province = collect($provinces)->firstWhere('province_code', $user->province_code);
-            $user->province_name = $province['province_name'] ?? $user->province_name ?? '';
+        $users->getCollection()->transform(function($user) use ( $cities, $barangays) {
+     
 
             $city = collect($cities)->firstWhere('city_code', $user->city_code);
             $user->city_name = $city['city_name'] ?? $user->city_name ?? '';
@@ -101,20 +98,17 @@ public function storeStaff(Request $request)
         'barangay_code' => 'nullable|string|max:255',
         'barangay_name' => 'nullable|string|max:255',
         'role'          => 'required|in:admin,staff',
-            'password' => [
-        'required',
-        'string',
-        'min:8',
-        'regex:/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).+$/', 
-        'confirmed'
-    ],
+
     ]);
 
     $plainPassword = Str::random(8);
 
  
     $user = User::create([
-        'name'          => $request->name,
+        'first_name'          => $request->first_name,
+        'last_name'  => $request->last_name,
+        'middle_name' => $request->middle_name,
+        'suffix'    => $request->suffix,
         'email'         => $request->email,
         'phone'         => $request->phone,
         'city_code'     => $request->city_code,
@@ -137,15 +131,25 @@ public function storeStaff(Request $request)
 
 
 
-            public function checkEmail(Request $request)
-            {
-                $email = $request->query('email');
-                $exists = User::where('email', $email)->exists();
+public function checkEmail(Request $request)
+{
+    $email = $request->query('email');
+    $userId = $request->query('user_id'); 
 
-                return response()->json([
-                    'available' => !$exists
-                ]);
-            }
+    $query = User::where('email', $email);
+
+ 
+    if ($userId) {
+        $query->where('id', '!=', $userId);
+    }
+
+    $exists = $query->exists();
+
+    return response()->json([
+        'available' => !$exists
+    ]);
+}
+
 
 
 
@@ -155,7 +159,11 @@ public function update(Request $request, $id)
     $user = User::findOrFail($id);
 
     $validatedData = $request->validate([
-        'name' => 'required|string|max:255',
+        'first_name' => 'required|string|max:255',
+         'last_name' => 'required|string|max:255',
+          'middle_name' => 'required|string|max:255',
+          'suffix'        => 'nullable',
+
         'email' => 'required|email|unique:users,email,' . $user->id,
         'phone' => 'nullable|string|max:20',
        'city_code' => 'nullable|string|max:255',
@@ -182,7 +190,10 @@ public function update(Request $request, $id)
     $barangay_name = collect($barangays)->firstWhere('brgy_code', $barangay_code)['brgy_name'] ?? null;
 
     
-    $user->name = $validatedData['name'];
+    $user->first_name = $validatedData['first_name'];
+     $user->last_name = $validatedData['last_name'];
+      $user->middle_name = $validatedData['middle_name'];
+        $user->suffix = $validatedData['suffix'];
     $user->email = $validatedData['email'];
     $user->phone = $validatedData['phone'] ?? $user->phone;
     $user->city_code = $request->city_code;
@@ -192,9 +203,7 @@ public function update(Request $request, $id)
     $user->role = $validatedData['role'];
 
  
-    if (!empty($validatedData['password'])) {
-        $user->password = bcrypt($validatedData['password']);
-    }
+
 
     $user->save();
     
@@ -206,7 +215,14 @@ public function update(Request $request, $id)
 
 
 
-
+protected function authenticated(Request $request, $user)
+{
+    
+    DB::table('sessions')
+        ->where('user_id', $user->id)
+        ->where('id', '!=', Session::getId())
+        ->delete();
+}
 
 
 public function getArchivedStaff()
