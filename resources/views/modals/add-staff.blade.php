@@ -97,14 +97,14 @@
                         <div class="form-column">
                             <div class="form-group">
                                 <label for="city">City/Municipality</label>
-                                <select class="select" id="city" name="city_code"></select>
+                                <select class="select" id="city" name="city_code" required></select>
                                 <input type="hidden" id="city-text" name="city_name">
                             </div>
                         </div>
                         <div class="form-column">
                             <div class="form-group">
                                 <label for="barangay">Barangay</label>
-                                <select class="select" id="barangay" name="barangay_code"></select>
+                                <select class="select" id="barangay" name="barangay_code" required></select>
                                 <input type="hidden" id="barangay-text" name="barangay_name">
                             </div>
                         </div>

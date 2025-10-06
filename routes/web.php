@@ -76,7 +76,7 @@ use App\Models\Consumer;
                 Route::put('/consumer-archived/{id}', [ConsumerController::class, 'archived'])->name('consumer.archived');
                 Route::put('/consumer-restore/{id}', [ConsumerController::class, 'unArchived'])->name('consumer.unArchived');
                 Route::delete('/consumer/{id}', [ConsumerController::class, 'destroyConsumer'])->name('consumer.destroy');
-        
+                Route::patch('/consumer/toggle-status/{id}', [ConsumerController::class, 'statusToggle'])->name('consumer.toggleStatus');
 
         Route::get('/meters/{meter}/transfer', [ConsumerMeterHistoryController::class, 'transferForm'])->name('meters.transfer.form');
         Route::post('/meters/{meter}/transfer-or-replace', [ConsumerMeterHistoryController::class, 'transferOrReplace'])
@@ -109,10 +109,16 @@ Route::post('/consumers/{consumer}/assign-meter', [ConsumerMeterHistoryControlle
 
                 Route::delete('/electricMeter/{id}', [ElectricMeterController::class, 'destroy'])->name('electricMeter.destroy');
                 Route::delete('/electricMeterbulkDelete', [ElectricMeterController::class, 'bulkDelete'])->name('electricMeter.bulkDelete');
-                
+       
+
+Route::put('/meters/{meter}/update', [ElectricMeterController::class, 'updateMeter'])->name('meters.update');
 
                 Route::get('/brownoutSched', [BrownoutScheduling::class, 'index'])->name('BrownoutScheduling.index');
                 Route::post('/storeSchedule', [BrownoutScheduling::class, 'storeSchedule'])->name('store.schedule');
+                Route::put('/brownoutSchedUpdate/{id}' , [BrownoutScheduling::class, 'updateSchedule'])->name('schedule.update');
+                Route::put('/schedule/{id}/cancel', [BrownoutScheduling::class, 'cancel'])->name('schedule.cancel');
+               Route::put('/schedule/{id}/archive', [BrownoutScheduling::class, 'archive'])->name('schedule.archive');
+
                 Route::get('/reconnection', [ReconnectionController::class, 'index'])->name('reconnection.index');
 
                 Route::post('/linemen', [LineManController::class, 'createLineMan'])->name('linemen.create');

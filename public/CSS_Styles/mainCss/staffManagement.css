@@ -1,13 +1,11 @@
-/* -----------------------------
-   Staff Management Styles
------------------------------- */
 
-/* Content wrapper */
+
+
 .content {
     margin-left: 250px;
 }
 
-/* Header */
+
 header {
     display: flex;
     justify-content: space-between;
@@ -293,10 +291,143 @@ header button:hover {
 .pagination {
     display: flex;
 
-    gap: 300px;
+    gap: 700px;
 }
 
 .results-info {
     font-size: 14px;
     color: #555;
+}
+
+
+
+.view-details {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
+
+
+.view-details.active {
+    display: flex;
+}
+
+
+.view-details-content {
+    background: #1f2937;
+    color: #f9fafb;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+}
+
+
+.view-details-header {
+    background: #111827;
+    color: #f3f4f6;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.view-details-header h3 {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.view-details-close {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.view-details-close:hover {
+    color: #fff;
+}
+
+
+.view-details-body {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14.5px;
+}
+
+.view-details-body p {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    color: #d1d5db;
+}
+
+.view-details-body strong {
+    color: #9ca3af;
+}
+
+
+.view-details-badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.view-details-active {
+    background: #16a34a;
+}
+
+.view-details-leave {
+    background: #f59e0b;
+}
+
+
+.view-details-footer {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 18px;
+    text-align: right;
+}
+
+.view-details-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.view-details-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

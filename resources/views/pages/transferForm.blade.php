@@ -45,18 +45,20 @@
             <div id="transferFields" class="form-group hidden">
                 <label for="consumer_id">Select New Consumer</label>
                 <select name="consumer_id" id="consumer_id" class="form-control select2">
-                    <option value="">-- Choose Consumer --</option>
+                    <option value="" required>-- Choose Consumer --</option>
                     @foreach($consumers as $consumer)
                         <option value="{{ $consumer->id }}">{{ $consumer->full_name }}</option>
                     @endforeach
                 </select>
+
+                
             </div>
 
 
             <div id="replacementFields" class="form-group hidden">
                 <label for="new_meter_no">Select Replacement Meter</label>
                 <select name="new_meter_no" id="new_meter_no" class="form-control">
-                    <option value="">-- Choose Available Meter --</option>
+                    <option value="" required>-- Choose Available Meter --</option>
                     @foreach($meters as $availableMeter)
                         <option value="{{ $availableMeter->electric_meter_number }}">
                             {{ $availableMeter->electric_meter_number }}
@@ -68,11 +70,23 @@
                 @enderror
             </div>
 
+                <div id="houseTypeField" class="form-group hidden">
+        <label for="house_type">House Type</label>
+        <select name="house_type" id="house_type" class="form-control">
+            <option value="">-- Select Type --</option>
+            <option value="residential">Residential</option>
+            <option value="commercial">Commercial</option>
+            <option value="industrial">Industrial</option>
+        </select>
+    </div>
+
             <div class="form-actions">
                 <button type="submit" id="submitBtn" class="btn-submit">Submit</button>
             </div>
         </form>
     </div>
+
+
 
     
     <div class="card history-card">
@@ -100,18 +114,25 @@
 <script>
 function toggleFields() {
     const mode = document.getElementById('mode').value;
-    document.getElementById('transferFields').classList.toggle('hidden', mode !== 'transfer');
-    document.getElementById('replacementFields').classList.toggle('hidden', mode !== 'replacement');
-}
+    const transferFields = document.getElementById('transferFields');
+    const replacementFields = document.getElementById('replacementFields');
+    const houseTypeField = document.getElementById('houseTypeField');
 
+    transferFields.classList.toggle('hidden', mode !== 'transfer');
+    replacementFields.classList.toggle('hidden', mode !== 'replacement');
+
+    
+    houseTypeField.classList.toggle('hidden', mode === '');
+}
 
 $(document).ready(function() {
     $('#consumer_id').select2({
         placeholder: "-- Choose Consumer --",
         allowClear: true,
-        width: '100%'  
+        width: '100%'
     });
 });
+
 </script>
 
 </body>

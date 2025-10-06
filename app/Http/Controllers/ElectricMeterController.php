@@ -94,6 +94,23 @@ $archivedMeters = ElectricMeter::query()
         return redirect()->route('electricMeter.index')->with('success','Electric Meter Updated Successfully');
     }
 
+
+    
+public function updateMeter(Request $request, ElectricMeter $meter)
+{
+    $validated = $request->validate([
+        'installation_date' => 'required|date',
+        'house_type' => 'required|in:residential,commercial,industrial',
+    ]);
+
+    $meter->update([
+        'installation_date' => $validated['installation_date'],
+        'house_type' => $validated['house_type'],
+    ]);
+
+    return redirect()->back()->with('success', 'Meter details updated successfully.');
+}
+
   
 
 

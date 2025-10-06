@@ -28,7 +28,7 @@ use HasFactory;
 
     public function consumer()
 {
-    return $this->belongsTo(Consumer::class);
+    return $this->belongsTo(Consumer::class, 'consumer_id');
 }
 
     public function history()

@@ -27,26 +27,26 @@ class ConsumerController extends Controller
         ->get();
 
    
-    $query = Consumer::query()
-        ->where('status', '!=', 'archived')
-        ->orderBy('created_at', 'desc')
-        ->when($searchConsumer, function ($query, $searchConsumer) {
-            $query->where(function ($q) use ($searchConsumer) {
-                $q->where('id', 'like', "%{$searchConsumer}%")
-                  ->orWhere('first_name', 'like', "%{$searchConsumer}%")
-                  ->orWhere('last_name', 'like', "%{$searchConsumer}%")
-                  ->orWhere('status', 'like', "%{$searchConsumer}%")
-                  ->orWhereHas('electricMeters', function ($meterQuery) use ($searchConsumer) {
-                      $meterQuery->where('electric_meter_number', 'like', "%{$searchConsumer}%");
-                  });
-            });
-        })
-        ->when($status && $status !== 'all', function ($query) use ($status) {
-            $query->where('status', $status);
-        })
-        ->when($house_type && $house_type !== 'all', function ($query) use ($house_type) {
-            $query->where('house_type', $house_type);
+    $query = Consumer::with('electricMeters')
+    ->where('status', '!=', 'archived')
+    ->orderBy('created_at', 'desc')
+    ->when($searchConsumer, function ($query, $searchConsumer) {
+        $query->where(function ($q) use ($searchConsumer) {
+            $q->where('id', 'like', "%{$searchConsumer}%")
+              ->orWhere('first_name', 'like', "%{$searchConsumer}%")
+              ->orWhere('last_name', 'like', "%{$searchConsumer}%")
+              ->orWhere('status', 'like', "%{$searchConsumer}%")
+              ->orWhereHas('electricMeters', function ($meterQuery) use ($searchConsumer) {
+                  $meterQuery->where('electric_meter_number', 'like', "%{$searchConsumer}%");
+              });
         });
+    })
+    ->when($status && $status !== 'all', function ($query) use ($status) {
+        $query->where('status', $status);
+    })
+    ->when($house_type && $house_type !== 'all', function ($query) use ($house_type) {
+        $query->where('house_type', $house_type);
+    });
 
     
     $consumers = $query->paginate(5, ['*'], 'page_main');
@@ -139,8 +139,7 @@ class ConsumerController extends Controller
          'street' => $validated['street'],
         'phone'      => $validated['phone'] ?? null,
           'password' => Hash::make($plainPassword),
-        'house_type' => $validated['house_type'],
-        'installation_date' => $validated['installation_date'],
+        'status' => 'active',
         'must_change_password' => true,
     ]);
 
@@ -149,6 +148,7 @@ class ConsumerController extends Controller
         ->update([
             'consumer_id' => $consumer->id,
             'status' => 'active',
+               'house_type' => $validated['house_type'],
             'installation_date' => $request->installation_date,
         ]);
 
@@ -210,22 +210,15 @@ public function update(Request $request, $id)
             'unique:consumers,phone,' . $consumer->id,
         ],
 
-        'installation_date' => 'nullable|date',
-        'house_type'        => 'nullable|in:residential,commercial,industrial',
+      
     ]);
 
     
-    $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
-    $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+  
     $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
     $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
    
-    $region_code = $request->region_code;
-    $region_name = collect($regions)->firstWhere('region_code', $region_code)['region_name'] ?? null;
-
-    $province_code = $request->province_code;
-    $province_name = collect($provinces)->firstWhere('province_code', $province_code)['province_name'] ?? null;
 
     $city_code = $request->city_code;
     $city_name = collect($cities)->firstWhere('city_code', $city_code)['city_name'] ?? null;
@@ -250,13 +243,7 @@ public function update(Request $request, $id)
     ]);
 
     
-    if ($request->filled('installation_date')) {
-        $activeMeter = $consumer->electricMeters()->where('status', 'active')->first();
-        if ($activeMeter) {
-            $activeMeter->installation_date = $validated['installation_date'];
-            $activeMeter->save();
-        }
-    }
+
 
     return redirect()->route('consumer.index')->with('success', 'Consumer updated successfully!');
 }
@@ -274,6 +261,21 @@ public function archived($id){
     $consumer->save();
 
     return redirect()->route('consumer.index')->with('success', 'Consumer archived successfully.');
+}
+
+public function statusToggle(Request $request, $id){
+      $consumer = Consumer::findOrFail($id);
+    $newStatus = $request->input('status');
+
+    if (in_array($newStatus, ['active', 'inactive'])) {
+        $consumer->status = $newStatus;
+        $consumer->save();
+
+      
+        return redirect()->back()->with('success', 'Status updated successfully!');
+    }
+
+    return redirect()->back()->with('error', 'Invalid status.');  
 }
 
 

@@ -97,25 +97,7 @@
             </div>
 
         
-            <div class="other-info">
-               <h3 class="section-title">Electric Meters Other Info</h3>
-                <div class="form-group">
-                    
-                    <label for="installation_date_{{ $consumer->id }}">Installation Date</label>
-                    <input  style="width:400px;" type="date" name="installation_date" id="installation_date_{{ $consumer->id }}"
-                           value="{{ old('installation_date', $consumer->installation_date ? \Carbon\Carbon::parse($consumer->installation_date)->format('Y-m-d') : '') }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="house_type_{{ $consumer->id }}">House Type</label>
-                    <select style="width:400px;" name="house_type" id="house_type_{{ $consumer->id }}">
-                        <option value="">-- Select --</option>
-                        <option value="residential" {{ old('house_type', $consumer->house_type) == 'residential' ? 'selected' : '' }}>Residential</option>
-                        <option value="commercial" {{ old('house_type', $consumer->house_type) == 'commercial' ? 'selected' : '' }}>Commercial</option>
-                        <option value="industrial" {{ old('house_type', $consumer->house_type) == 'industrial' ? 'selected' : '' }}>Industrial</option>
-                    </select>
-                </div>
-            </div>
+      
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Update Consumer</button>
@@ -263,6 +245,61 @@ document.addEventListener("DOMContentLoaded", function () {
     })();
     @endforeach
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    @foreach($consumers as $consumer)
+    (function() {
+        const form = document.getElementById("editConsumerForm-{{ $consumer->id }}");
+        if (!form) return;
+
+     
+        setTimeout(() => {
+            const originalData = {};
+
+          
+            Array.from(form.elements).forEach(el => {
+                if (el.name && !['hidden', 'submit', 'button'].includes(el.type)) {
+                    originalData[el.name] = (el.value || "").trim();
+                }
+            });
+
+     
+            form.addEventListener("submit", function (e) {
+                let changed = false;
+
+                Array.from(form.elements).forEach(el => {
+                    if (el.name && !['hidden', 'submit', 'button'].includes(el.type)) {
+                        const current = (el.value || "").trim();
+                        if (originalData[el.name] !== current) {
+                            changed = true;
+                        }
+                    }
+                });
+
+                if (!changed) {
+                    e.preventDefault();
+
+                 
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No changes detected',
+                        text: 'Please modify at least one field before updating.',
+                        confirmButtonColor: '#2563eb',
+                        background: '#1f2937',
+                        color: '#f9fafb'
+                    });
+                }
+            });
+        }, 500);
+    })();
+    @endforeach
+});
+
+
+
+
+
 
 
 

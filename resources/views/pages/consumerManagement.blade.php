@@ -44,11 +44,6 @@
                         <input type="search" id="searchInput" value="{{request('searchConsumer') }}" placeholder="Search consumer...">
                     </div>
 
-                            <select id="statusFilter" class="filter-select">
-                                <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Disconnected</option>
-                            </select>
 
                             <select id="houseTypeFilter" class="filter-select">
                                 <option value="all" {{ request('house_type') == 'all' ? 'selected' : '' }}>All Types</option>
@@ -78,12 +73,13 @@
             <th>Consumer</th>
             <th>Meter Number</th>
             <th>Address</th>
+            <th>House Type</th>
             <th>Last Reading</th>
             <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="consumersTables">
         @foreach($consumers as $consumer)
        
         <tr class="consumer-row">
@@ -100,6 +96,13 @@
             </td>
             <td>-</td>
             <td>{{ $consumer->city_name }}</td>
+           <td>
+                        @if($consumer->electricMeters->isNotEmpty())
+              -
+            @else
+                <em>No meter assigned</em>
+            @endif
+           </td>
             <td>-</td>
             <td>
                 <span class="badge {{ $consumer->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
@@ -107,7 +110,7 @@
                 </span>
             </td>
             <td>
-                @if($consumer->status == 'inactive')
+                
                 <div class="menu-dropdown">
                     <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                     <div class="header-menu">
@@ -120,30 +123,78 @@
                         <button onclick="openAssignModal({{ $consumer->id }})"><i class="fa fa-bolt"></i> Assign Meter</button>
                     </div>
                 </div>
-                @endif
+               
             </td>
         </tr>
 
       
-        @foreach($consumer->electricMeters as $meter)
-        <tr class="meter-row child-of-{{ $consumer->id }}" style="display:none;">
-            <td></td>
-            <td>{{ $consumer->full_name }}</td>
-            <td>{{ $meter->electric_meter_number }}</td>
-            <td>{{ $consumer->city_name }}</td>
-            <td>{{ $meter->last_reading ?? '0 kWh' }}</td>
-            <td>
-                <span class="badge {{ $meter->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
-                    {{ ucfirst($meter->status) }}
-                </span>
-            </td>
-            <td>
-                @if($meter->status == 'active')
-                <a href="{{ route('meters.transfer.form', $meter->id) }}" class="action-link">Transfer/Replace</a>
-                @endif
-            </td>
-        </tr>
+    @foreach($consumer->electricMeters as $meter)
+            <tr class="meter-row child-of-{{ $consumer->id }}" style="display:none;">
+                <td></td>
+                <td>{{ $consumer->full_name }}</td>
+                <td>{{ $meter->electric_meter_number }}</td>
+                <td>{{ $consumer->city_name }}</td>
+                <td>{{ $meter->house_type }}</td>
+                <td>{{ $meter->last_reading ?? '0 kWh' }}</td>
+                <td>
+                    <span class="badge {{ $meter->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
+                        {{ ucfirst($meter->status) }}
+                    </span>
+                </td>
+                <td>
+                    @if($meter->status == 'active')
+                        <div class="menu-dropdown">
+                            <button class="dropdown-toggle">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="header-menu">
+                                <a href="{{ route('meters.transfer.form', $meter->id) }}" style="color:#2563eb;">
+                                    <i class="fa-solid fa-right-left"></i> Transfer/Replace
+                                </a>
+                                <button style="color:#22c55e;" onclick="openEditMeter({{ $meter->id }})">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                            </div>
+                        </div>
+
+                      
+                        <div id="edit-meter-{{ $meter->id }}" class="edit-meter-modal" style="display:none;">
+                            <div class="modal-content">
+                                <h3>Edit Meter Details</h3>
+                                <form action="{{route('meters.update', $meter->id)}}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    
+                                    <div class="form-group">
+                                        <label>Installation Date</label>
+                                        <input type="date" 
+                                               name="installation_date" 
+                                               value="{{ $meter->installation_date ? $meter->installation_date->format('Y-m-d') : '' }}"
+                                               class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>House Type</label>
+                                        <select name="house_type" class="form-control">
+                                            <option value="residential" {{ $meter->house_type == 'residential' ? 'selected' : '' }}>Residential</option>
+                                            <option value="commercial" {{ $meter->house_type == 'commercial' ? 'selected' : '' }}>Commercial</option>
+                                            <option value="industrial" {{ $meter->house_type == 'industrial' ? 'selected' : '' }}>Industrial</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn-save">Save Changes</button>
+                                        <button type="button" class="btn-cancel" onclick="closeEditMeter({{ $meter->id }})">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+                </td>
+            </tr>
         @endforeach
+        </tr>
+
         @endforeach
     </tbody>
 </table>
@@ -205,7 +256,34 @@
 
     <script>
 
+function setupMeterForm(id) {
+    const form = document.querySelector(`#edit-meter-${id} form`);
+    const originalDate = form.querySelector('input[name="installation_date"]').value;
+    const originalType = form.querySelector('select[name="house_type"]').value;
 
+    form.addEventListener('submit', function(e) {
+        const currentDate = form.querySelector('input[name="installation_date"]').value;
+        const currentType = form.querySelector('select[name="house_type"]').value;
+
+        if (currentDate === originalDate && currentType === originalType) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'No Changes Made',
+                text: 'Please modify the form before saving.',
+                icon: 'info',
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+    });
+}
+function openEditMeter(id) {
+    document.getElementById(`edit-meter-${id}`).style.display = 'flex';
+     setupMeterForm(id);
+}
+
+function closeEditMeter(id) {
+    document.getElementById(`edit-meter-${id}`).style.display = 'none';
+}
 
 
 function openAssignModal(consumerId) {
@@ -270,7 +348,36 @@ function openEditConsumer(id) {
 
 
 function closeEditConsumer(id) {
-    document.getElementById(`edit-consumer-${id}`).style.display = "none";
+    const modal = document.getElementById(`edit-consumer-${id}`);
+    const form = document.getElementById(`editConsumerForm-${id}`);
+    
+    if (form) {
+        
+        form.reset();
+        
+      
+        form.querySelectorAll(".error-message").forEach(el => {
+            el.textContent = "";
+        });
+        
+     
+        form.querySelectorAll(".invalid").forEach(el => {
+            el.classList.remove("invalid");
+        });
+        
+      
+        const citySelect = document.getElementById(`city-${id}`);
+        const barangaySelect = document.getElementById(`barangay-${id}`);
+        
+        if (citySelect) citySelect.selectedIndex = 0;
+        if (barangaySelect) barangaySelect.selectedIndex = 0;
+    }
+    
+   
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove('active');
+    }
 }
 
 

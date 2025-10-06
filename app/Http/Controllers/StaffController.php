@@ -13,64 +13,50 @@ use Illuminate\Support\Facades\Session;
 class StaffController extends Controller
 {
 
-    public function index(Request $request)
-    {
-        $searchUser = trim($request->input('searchUser'));
-        $status     = $request->input('status', 'all'); 
-        $role       = 'staff'; 
-        $pageMain   = $request->input('page_main', 1);
+public function index(Request $request)
+{
+    $searchUser = trim($request->input('searchUser'));
+    $status     = $request->input('status', 'all'); 
+    $role       = 'staff'; 
+    $pageMain   = $request->input('page_main', 1);
 
-        $query = User::query()
-            ->where('archived', 0)
-            ->where('role', $role)
-            ->when($status !== 'all', fn($q) => $q->where('status', $status))
-            ->when($searchUser, fn($q) => $q->where(function($q2) use ($searchUser) {
-                $q2->where('name', 'like', "%{$searchUser}%")
-                ->orWhere('email', 'like', "%{$searchUser}%")
-                ->orWhere('status', 'like', "%{$searchUser}%");
-            }))
-            ->orderByDesc('created_at');
+    $query = User::query()
+        ->where('archived', 0)
+        ->where('role', $role)
+        ->when($status !== 'all', fn($q) => $q->where('status', $status))
+        ->when($searchUser, fn($q) => $q->where(function($q2) use ($searchUser) {
+            $q2->where('first_name', 'like', "%{$searchUser}%")
+               ->orWhere('last_name', 'like', "%{$searchUser}%")
+               ->orWhere('email', 'like', "%{$searchUser}%")
+               ->orWhere('status', 'like', "%{$searchUser}%");
+        }))
+        ->orderByDesc('created_at');
 
-        $users = $query->paginate(2, ['*'], 'page_main');
+    $users = $query->paginate(2, ['*'], 'page_main');
 
-   
+    $cities    = json_decode(file_get_contents(public_path('json/city.json')), true);
+    $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-        $cities    = json_decode(file_get_contents(public_path('json/city.json')), true);
-        $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
+    $users->getCollection()->transform(function($user) use ($cities, $barangays) {
+        $city = collect($cities)->firstWhere('city_code', $user->city_code);
+        $user->city_name = $city['city_name'] ?? '';
+        $barangay = collect($barangays)->firstWhere('brgy_code', $user->barangay_code);
+        $user->barangay_name = $barangay['brgy_name'] ?? '';
+        return $user;
+    });
 
-        $users->getCollection()->transform(function($user) use ( $cities, $barangays) {
-     
+    $archivedUsers = User::where('archived', 1)
+        ->where('role', 'staff')
+        ->orderByDesc('created_at')
+        ->paginate(2, ['*'], 'page_archive');
 
-            $city = collect($cities)->firstWhere('city_code', $user->city_code);
-            $user->city_name = $city['city_name'] ?? $user->city_name ?? '';
-
-            $barangay = collect($barangays)->firstWhere('brgy_code', $user->barangay_code);
-            $user->barangay_name = $barangay['brgy_name'] ?? $user->barangay_name ?? '';
-
-            return $user;
-        });
-
-        $archivedUsers = User::where('archived', 1)
-                            ->where('role', 'staff')
-                            ->orderByDesc('created_at')
-                            ->paginate(2, ['*'], 'page_archive');
-
-if ($request->ajax()) {
-    if ($request->has('page_archive')) {
-   
-        $html = view('modals.archived-staff', compact('archivedUsers'))->render();
-        return response()->json(['html' => $html]);
-    } else {
-      
+    if ($request->ajax()) {
         $html = view('pages.staffManagement', compact('users', 'archivedUsers'))->render();
         return response()->json(['html' => $html]);
     }
+
+    return view('pages.staffManagement', compact('users', 'archivedUsers'));
 }
-
-
-
-        return view('pages.staffManagement', compact('users', 'archivedUsers'));
-    }
 
 
 

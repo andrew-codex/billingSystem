@@ -98,7 +98,7 @@ header button:hover{
 
 .search-wrapper input {
     padding: 8px 12px 8px 34px; 
-    width: 640px;
+    width: 840px;
     border: 1px solid #ddd;
     border-radius: 8px;
     outline: none;
@@ -114,22 +114,7 @@ header button:hover{
 }
 
 
-.filter-select {
-  margin-left: 15px;
 
-    padding: 8px 18px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 14px;
-    background: #fff;
-    cursor: pointer;
-    transition: border 0.2s ease, box-shadow 0.2s ease;
-}
-
-.filter-select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
 
 
 .consumer-table {
@@ -137,7 +122,7 @@ header button:hover{
     border-collapse: collapse;
     background: #fff;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: auto;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
@@ -212,6 +197,7 @@ header button:hover{
 .menu-dropdown {
     position: relative;
     display: inline-block;
+    
 }
 
 .dropdown-toggle {
@@ -227,7 +213,7 @@ header button:hover{
     border: 1px solid #ddd;
     border-radius: 6px;
     min-width: 140px;
-    z-index: 10;
+    z-index: 1000;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
@@ -438,4 +424,137 @@ header button:hover{
 
 .header-menu a i {
       margin-right: 0.5rem;
+}
+
+
+
+
+
+.edit-meter-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
+
+.edit-meter-modal.active {
+    display: flex;
+}
+
+.edit-meter-modal .modal-content {
+    max-height: 90vh;
+    background: #1e293b;
+    color: #f8fafc;
+    border-radius: 14px;
+    width: 500px;
+    max-width: 95%;
+    padding: 28px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+    position: relative;
+    animation: fadeIn 0.35s ease-in-out;
+}
+
+.edit-meter-modal .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.edit-meter-modal .close-btn:hover {
+    color: #f87171;
+}
+
+.edit-meter-modal .modal-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    border-bottom: 1px solid #2d2f3a;
+    margin-bottom: 1.4rem;
+    padding-bottom: 0.6rem;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.edit-meter-modal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1.2rem;
+}
+
+.edit-meter-modal label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.edit-meter-modal input,
+.edit-meter-modal select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid #374151;
+    background: #2d2f3a;
+    color: #f9fafb;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.edit-meter-modal input:focus,
+.edit-meter-modal select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    outline: none;
+    background: #374151;
+}
+
+.edit-meter-modal .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 1.8rem;
+}
+
+.edit-meter-modal .form-actions button {
+    padding: 0.7rem 1.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edit-meter-modal .btn-save {
+    background: #3b82f6;
+    color: white;
+}
+
+.edit-meter-modal .btn-save:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.edit-meter-modal .btn-cancel {
+    background: #ef4444;
+    color: white;
+}
+
+.edit-meter-modal .btn-cancel:hover {
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+@keyframes fadeIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }

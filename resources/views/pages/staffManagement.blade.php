@@ -35,7 +35,6 @@
 <select id="statusFilter" class="filter-select">
     <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>All Status</option>
     <option value="active" {{ request('status', 'all') == 'active' ? 'selected' : '' }}>Active</option>
-    <option value="inactive" {{ request('status', 'all') == 'inactive' ? 'selected' : '' }}>Inactive</option>
     <option value="leave" {{ request('status', 'all') == 'leave' ? 'selected' : '' }}>On Leave</option>
 </select>
 
@@ -64,15 +63,13 @@
                     <tbody id="staffTables">
                         @foreach($users as $user)
                             <tr>
-                                <td><strong>{{ $user->first_name }}</strong><br><small>ID: {{ $user->id }}</small></td>
+                                <td><strong>{{ $user->first_name }} {{ $user->last_name }}</strong><br><small>ID: {{ $user->id }}</small></td>
                                 <td>{{ $user->email }}</td>
                                 <td><span class="badge badge-staff">{{ $user->role }}</span></td>
                                 <td>{{$user->full_address}}</td>
                                 <td>
                                     @if($user->status == 'active')
                                         <span class="badge badge-active">Active</span>
-                                    @elseif($user->status == 'inactive')
-                                        <span class="badge badge-inactive">Inactive</span>
                                     @elseif($user->status == 'leave')
                                     <span class="badge badge-on_leave">On Leave</span>
                                     @endif
@@ -108,29 +105,9 @@
                 <i class="fa-solid fa-pen-to-square"></i> Edit
             </button>
 
-          
-            @if($user->status !== 'active')
-            <form action="{{ route('staff.toggleStatus', $user->id) }}" method="POST">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="active">
-                <button type="submit" style="color:#15803d;">
-                    <i class="fa-solid fa-user-check"></i> Activate
-                </button>
-            </form>
-            @endif
+    
 
-        
-            @if($user->status !== 'inactive')
-            <form action="{{ route('staff.toggleStatus', $user->id) }}" method="POST">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="inactive">
-                <button type="submit" style="color:#b91c1c;">
-                    <i class="fa-solid fa-user-times"></i> Deactivate
-                </button>
-            </form>
-            @endif
+
 
           
             @if($user->status !== 'leave')
@@ -142,7 +119,11 @@
                     <i class="fa-solid fa-plane"></i> On Leave
                 </button>
             </form>
+
+ 
             @endif
+
+
 
             
             <form action="{{ route('staff.archive', $user->id) }}" method="POST">
@@ -153,6 +134,9 @@
                 </button>
             </form>
         @endif
+                               <button style="color:#2563eb;" onclick="openViewDetails({{ $user->id }})">
+                <i class="fa-solid fa-eye"></i> View Details
+            </button>
 
     </div>
 </div>
@@ -160,6 +144,40 @@
 
                                 </td>
                             </tr>
+
+
+                         
+<div class="view-details" id="view-details-{{ $user->id }}">
+    <div class="view-details-content">
+        <div class="view-details-header">
+            <h3><i class="fa-solid fa-user"></i> Staff Details</h3>
+            <button class="view-details-close" onclick="closeViewDetails({{ $user->id }})">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="view-details-body">
+            <p><strong>ID:</strong> {{ $user->id }}</p>
+            <p><strong>Name:</strong> {{ $user->first_name }} {{ $user->last_name }}</p>
+            <p><strong>Email:</strong> {{ $user->email }}</p>
+            <p><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
+            <p><strong>Status:</strong>
+                @if($user->status == 'active')
+                    <span class="view-details-badge view-details-active">Active</span>
+                @elseif($user->status == 'leave')
+                    <span class="view-details-badge view-details-leave">On Leave</span>
+                @endif
+            </p>
+            <p><strong>Address:</strong> {{ $user->full_address }}</p>
+            <p><strong>Created At:</strong> {{ $user->created_at->format('F d, Y h:i A') }}</p>
+        </div>
+
+        <div class="view-details-footer">
+            <button onclick="closeViewDetails({{ $user->id }})" class="view-details-btn">Close</button>
+        </div>
+    </div>
+</div>
+
                         @endforeach
                     </tbody>
                 </table>
@@ -203,6 +221,14 @@
     </div>
 
 <script>
+
+        function openViewDetails(id) {
+    document.getElementById(`view-details-${id}`).classList.add('active');
+}
+
+function closeViewDetails(id) {
+    document.getElementById(`view-details-${id}`).classList.remove('active');
+}
 function openAddStaff() {
      document.querySelector(".add-staff").classList.add('active');
      }
@@ -215,7 +241,6 @@ function openEditStaff(id) {
 
 
 
- 
     const $city     = $(`#city-${id}`);
     const $barangay = $(`#barangay-${id}`);
 

@@ -51,7 +51,7 @@
                 <div class="header-dropdown">
                     <button class="header-ropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                     <div class="header-menu">
-                        <button onclick="openAddMeter()"><i class="fa-solid fa-box-archive"></i> Archived List</button>
+                        <button onclick="openArchivedMeter()"><i class="fa-solid fa-box-archive"></i> Archived List</button>
                     </div>
                 </div>
         </div>
