@@ -131,16 +131,34 @@
 
                 <select id="statusFilter" class="filter-select">
                       <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
-                      <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                      <option value="Group Name" {{ request('status') == 'Group Name' ? 'selected' : '' }}>Group Name</option>
                       <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Disconnected</option>
                 </select>
 
             </div>
 
-         
+            @php
+                $groupedLinemen = $linemen->groupBy('group_name');
+            @endphp
 
-                  <div class="card-grid fade-in">
-                      @foreach($linemen as $lineman)
+@foreach($groupedLinemen as $groupName => $group)
+    <div class="group-section">
+        <div class="group-header">
+            <div class="group-badge">
+                <i class="fa-solid fa-users"></i>
+                {{ $groupName ?? 'Individual Linemen' }}
+            </div>
+            <div class="group-count">
+                {{ $group->count() }} Members
+            </div>
+        </div>
+
+        
+
+    <div class="card-grid fade-in">
+        @foreach($group as $lineman)
+                           <div class="card-grid fade-in">
+                  
                           <div class="card">
                               <div class="card-header">
                                   @php
@@ -148,23 +166,11 @@
                                   @endphp   
                                   <div class="avatar">{{ $initials }}</div>
                                   <div class="info">
-                                      <h3>{{$lineman->first_name}}</h3>
+                                      <h3>{{$lineman->first_name}} {{$lineman->last_name}}</h3>
                                       <p> ID: {{$lineman->id}}</p>
                                   </div>
 
-                                  <span class="status 
-                                      @if($lineman->status === 'inactive') not-available 
-                                      @elseif($lineman->availability) available 
-                                      @else not-available 
-                                      @endif">
-                                      @if($lineman->status === 'inactive')
-                                          Deactivated
-                                      @elseif($lineman->status === 'on_leave')
-                                          On Leave
-                                      @else
-                                          {{ $lineman->availability ? 'Available' : 'Not Available' }}
-                                      @endif
-                                  </span>
+                       
 
                                   <div class="header-dropdown">
                                       <button class="header-dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
@@ -187,63 +193,68 @@
 
 
 
-            <form action="{{ route('linemen.onleave', $lineman->id) }}" method="POST">
-                @csrf
-                <button type="submit" style="color:#f59e0b;">
-                    <i class="fa-solid fa-user-clock"></i> On Leave
-                </button>
-            </form>
+                                        <form action="{{ route('linemen.onleave', $lineman->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" style="color:#f59e0b;">
+                                                <i class="fa-solid fa-user-clock"></i> On Leave
+                                            </button>
+                                        </form>
 
-        @elseif($lineman->status === 'inactive')
-      
-            <form action="{{ route('linemen.activate', $lineman->id) }}" method="POST">
-                @csrf
-                <button type="submit" style="color:#16a34a;">
-                    <i class="fa-solid fa-user-check"></i> Activate
-                </button>
-            </form>
+                                    @elseif($lineman->status === 'inactive')
+                                
+                                        <form action="{{ route('linemen.activate', $lineman->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" style="color:#16a34a;">
+                                                <i class="fa-solid fa-user-check"></i> Activate
+                                            </button>
+                                        </form>
 
-            <form action="{{ route('linemen.archive', $lineman->id) }}" method="POST">
-                @csrf
-                <button type="submit" style="color:#6b7280;">
-                    <i class="fa-solid fa-archive"></i> Archive
-                </button>
-            </form>
+                                        <form action="{{ route('linemen.archive', $lineman->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" style="color:#6b7280;">
+                                                <i class="fa-solid fa-archive"></i> Archive
+                                            </button>
+                                        </form>
 
-        @elseif($lineman->status === 'on_leave')
-            
-            <form action="{{ route('linemen.back_from_leave', $lineman->id) }}" method="POST">
-                @csrf
-                <button type="submit" style="color:#16a34a;">
-                    <i class="fa-solid fa-arrow-rotate-left"></i> Back from Leave
-                </button>
-            </form>
-        @endif
-    </div>
-</div>
+                                    @elseif($lineman->status === 'on_leave')
+                                        
+                                        <form action="{{ route('linemen.back_from_leave', $lineman->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" style="color:#16a34a;">
+                                                <i class="fa-solid fa-arrow-rotate-left"></i> Back from Leave
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
 
 
 
-                              </div>
+                            </div>
 
                               <div class="card-body">
-                                  <div class="row">
-                                      <span><strong>Active Jobs</strong><br> 0</span>
-                                  </div>
-                                  <div class="row">
-                                      <span><strong>Completed Today</strong><br> 3</span>
-                                  </div>
+                           
                               </div>
 
                               <div class="card-footer">
                                   <button class="btn-outline" onclick="openProfile({{ $lineman->id }})">
                                       <i class="fa-solid fa-user"></i> View Profile
                                   </button>
-                                  <button class="btn-primary"><i class="fa-solid fa-briefcase"></i> Assign Job</button>
+                                 
                               </div>
                           </div>
-                      @endforeach
+
+                     
+                
                   </div>
+        @endforeach
+    </div>
+    </div>
+@endforeach
+
+         
+
+  
 
       </div>
 

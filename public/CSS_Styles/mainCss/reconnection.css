@@ -279,7 +279,7 @@ header button:hover{
 
 
 .card-grid {
-  margin-top: 20px;
+  margin-top: 5px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
@@ -454,3 +454,101 @@ header button:hover{
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
+
+
+.group-section {
+  
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+ 
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.group-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.group-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 6px 12px;
+  border-radius: 9999px;
+}
+
+.group-badge i {
+  color: #3b82f6;
+}
+
+.group-count {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.group-status {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.group-status span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+
+.group-status .available { color: #16a34a; }
+.group-status .on-leave { color: #f59e0b; }
+.group-status .inactive { color: #dc2626; }
+
+.group-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.group-btn {
+  background: #eff6ff;
+  color: #2563eb;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.group-btn:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.group-btn.danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.group-btn.danger:hover {
+  background: #dc2626;
+  color: white;
+}
+
+
+

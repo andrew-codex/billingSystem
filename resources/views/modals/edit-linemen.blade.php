@@ -27,7 +27,7 @@
                 </div>
                 <div class="form-group">
                     <label for="suffix_{{ $lineman->id }}">Suffix</label>
-                    <select name="suffix" id="suffix_{{ $lineman->id }}" class="select">
+                    <select style="width: 85%;" name="suffix" id="suffix_{{ $lineman->id }}" class="select">
                         <option value="">-- None --</option>
                         <option value="Jr." {{ old('suffix', $lineman->suffix) == 'Jr.' ? 'selected' : '' }}>Jr.</option>
                         <option value="Sr." {{ old('suffix', $lineman->suffix) == 'Sr.' ? 'selected' : '' }}>Sr.</option>
@@ -36,10 +36,20 @@
                         <option value="IV" {{ old('suffix', $lineman->suffix) == 'IV' ? 'selected' : '' }}>IV</option>
                     </select>
                 </div>
+
+                
                 <div class="form-group">
                     <label for="contact_number{{ $lineman->id }}">Contact</label>
-                    <input type="text" name="contact" id="contact_number{{ $lineman->id }}" value="{{ old('contact_number', $lineman->contact_number) }}" placeholder="09XXXXXXXXX" pattern="09[0-9]{9}">
+                    <input type="text" name="contact_number" id="contact_number{{ $lineman->id }}" value="{{ old('contact_number', $lineman->contact_number) }}" placeholder="09XXXXXXXXX" pattern="09[0-9]{9}">
                 </div>
+
+                <div class="form-group">
+                    <label for="group_name">Group Name</label>
+                    <input type="text" name="group_name" id="group_name" value="{{ $lineman->group_name }}" class="form-control">
+                </div>
+
+
+        
             </div>
 
             <h3 class="section-title">Address Information</h3>

@@ -8,12 +8,32 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 class ReconnectionController extends Controller
 {
-        public function index(){
+        public function index(Request $request)
+        {
 
 
         $availableCount = LineMan::where('availability', 1)->count();
 
-        $linemen = LineMan::orderBy('created_at', 'desc')->get();
+       $query = Lineman::query();
+
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            $q->where('first_name', 'like', '%' . $request->search . '%')
+              ->orWhere('last_name', 'like', '%' . $request->search . '%')
+              ->orWhere('group_name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    if ($request->status == 'Group Name') {
+        $query->whereNotNull('group_name')
+              ->where('group_name', '!=', '');
+    }
+
+    if ($request->status == 'inactive') {
+        $query->where('status', 'inactive');
+    }
+
+    $linemen = $query->orderBy('group_name')->orderBy('last_name')->get();
 
         
         $regions = json_decode(file_get_contents(public_path('json/region.json')), true);

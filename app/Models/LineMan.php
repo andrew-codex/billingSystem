@@ -21,6 +21,7 @@ class LineMan extends Model
         'city_name','city_code',
         'barangay_name','barangay_code',
         'street',
+        'group_name',
         'status',
     ];
 

@@ -12,19 +12,19 @@
             @method('POST')
 
             <div class="form-group">
-                <label for="first_name">First Name*</label>
+                <label for="first_name">First Name</label>
                 <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}" placeholder="Enter first name" required>
                 @error('first_name') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
-                <label for="middle_name">Middle Name*</label>
+                <label for="middle_name">Middle Name</label>
                 <input type="text" name="middle_name" id="middle_name" value="{{ old('middle_name') }}" placeholder="Enter middle name">
                 @error('middle_name') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
-                <label for="last_name">Last Name*</label>
+                <label for="last_name">Last Name</label>
                 <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}" placeholder="Enter last name" required>
                 @error('last_name') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
@@ -39,6 +39,11 @@
                     <option value="III">III</option>
                     <option value="IV">IV</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label for="group_name">Group Name</label>
+                <input type="text" name="group_name" id="group_name" value="{{ old('group_name') }}" class="form-control">
             </div>
 
             <div class="form-group">
@@ -89,19 +94,19 @@ document.addEventListener("DOMContentLoaded", function () {
     let cityDropdown = document.querySelector("#city");
     let barangayDropdown = document.querySelector("#barangay");
 
-    // Clear + set default option
+
     function resetDropdown(dropdown, placeholder) {
         dropdown.innerHTML = `<option selected disabled>${placeholder}</option>`;
     }
 
-    // Load South Cotabato Cities
+ 
     resetDropdown(cityDropdown, "Choose City/Municipality");
     resetDropdown(barangayDropdown, "Choose Barangay");
 
     fetch("/json/city.json")
         .then(res => res.json())
         .then(data => {
-            // South Cotabato province_code = 1263 (check province.json)
+            
             let cities = data.filter(c => c.province_code === "1263");
 
             cities.sort((a, b) => a.city_name.localeCompare(b.city_name));
@@ -114,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-    // Load Barangays when City changes
+
     cityDropdown.addEventListener("change", function () {
         let cityCode = this.value;
         let cityName = this.options[this.selectedIndex].text;

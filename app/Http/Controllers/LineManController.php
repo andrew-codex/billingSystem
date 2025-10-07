@@ -21,6 +21,7 @@ class LineManController extends Controller
             'barangay_name' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
              'availability' => 'nullable',
+             'group_name' => 'string|max:255',
              'contact_number' => 'required',
 
              
@@ -34,9 +35,9 @@ class LineManController extends Controller
            'last_name' =>$request->last_name,
            'middle_name' =>$request->middle_name,
            'suffix' => $request->suffix,
-          
-         'city_code' => $request->city_code,
-        'city_name' => $request->city_name,
+            'group_name' => $request->group_name,
+           'city_code' => $request->city_code,
+          'city_name' => $request->city_name,
          'barangay_code' => $request->barangay_code,
         'barangay_name' => $request->barangay_name,
         'street' => $request->street,
@@ -62,22 +63,18 @@ class LineManController extends Controller
             'city_name' => 'nullable|string|max:255',
                'barangay_code' => 'nullable|string|max:255',
             'barangay_name' => 'nullable|string|max:255',
+            'group_name' => 'string|max:255',
         'street' => 'nullable|string|max:255',
        
     ]);
 
     
-    $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
-    $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+
     $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
     $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
    
-    $region_code = $request->region_code;
-    $region_name = collect($regions)->firstWhere('region_code', $region_code)['region_name'] ?? null;
 
-    $province_code = $request->province_code;
-    $province_name = collect($provinces)->firstWhere('province_code', $province_code)['province_name'] ?? null;
 
     $city_code = $request->city_code;
     $city_name = collect($cities)->firstWhere('city_code', $city_code)['city_name'] ?? null;
@@ -89,11 +86,12 @@ class LineManController extends Controller
         'first_name' => $request->first_name,
         'last_name' => $request->last_name,
         'suffix' => $request->suffix,
-        'contact_number' => $request->contact,
+        'contact_number' => $request->contact_number,
          'city_code' => $request->city_code,
         'city_name' => $request->city_name,
          'barangay_code' => $request->barangay_code,
         'barangay_name' => $request->barangay_name,
+            'group_name' => $request->group_name,
         'street' => $request->street,
        
     ]);
@@ -139,6 +137,21 @@ class LineManController extends Controller
         $lineman->save();
         return back()->with('success', 'Lineman archived.');
     }
+
+
+    public function updateGroupName(Request $request)
+{
+    $request->validate([
+        'old_group_name' => 'nullable|string',
+        'new_group_name' => 'required|string|max:255',
+    ]);
+
+    Lineman::where('group_name', $request->old_group_name)
+        ->update(['group_name' => $request->new_group_name]);
+
+    return back()->with('success', 'Group name updated successfully.');
+}
+
 
 
 

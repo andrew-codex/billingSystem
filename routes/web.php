@@ -131,6 +131,7 @@ Route::put('/meters/{meter}/update', [ElectricMeterController::class, 'updateMet
 
                 Route::post('/linemen/{lineman}/archive', [LineManController::class, 'archive'])->name('linemen.archive');
                 Route::get('/linemen/{id}/profile', [LineManController::class, 'profile'])->name('linemen.profile');
+                Route::post('/linemen/update-group-name', [LineManController::class, 'updateGroupName'])->name('linemen.updateGroupName');
 
 
         });
