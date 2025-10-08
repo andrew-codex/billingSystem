@@ -41,10 +41,18 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="group_name">Group Name</label>
-                <input type="text" name="group_name" id="group_name" value="{{ old('group_name') }}" class="form-control">
-            </div>
+<div class="form-group">
+    <label for="group_id">Group Name</label>
+    <select name="group_id" id="group_id" class="select">
+        <option value="">-- Select Group --</option>
+        @foreach($groups as $group)
+            <option value="{{ $group->id }}" {{ old('group_id') == $group->id ? 'selected' : '' }}>
+                {{ $group->group_name }}
+            </option>
+        @endforeach
+    </select>
+    @error('group_id') <small class="text-danger">{{ $message }}</small> @enderror
+</div>
 
             <div class="form-group">
                 <label for="phone">Phone Number</label>

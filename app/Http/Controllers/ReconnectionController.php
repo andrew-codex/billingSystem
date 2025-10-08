@@ -6,58 +6,60 @@ use Illuminate\Http\Request;
 use App\Models\LineMan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Models\Group;
 class ReconnectionController extends Controller
 {
-        public function index(Request $request)
-        {
-
-
+    public function index(Request $request)
+    {
         $availableCount = LineMan::where('availability', 1)->count();
 
-       $query = Lineman::query();
+        $query = LineMan::with('group');
 
-    if ($request->filled('search')) {
-        $query->where(function($q) use ($request) {
-            $q->where('first_name', 'like', '%' . $request->search . '%')
-              ->orWhere('last_name', 'like', '%' . $request->search . '%')
-              ->orWhere('group_name', 'like', '%' . $request->search . '%');
-        });
-    }
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('first_name', 'like', '%' . $request->search . '%')
+                  ->orWhere('last_name', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('group', function($groupQuery) use ($request) {
+                      $groupQuery->where('name', 'like', '%' . $request->search . '%');
+                  });
+            });
+        }
 
-    if ($request->status == 'Group Name') {
-        $query->whereNotNull('group_name')
-              ->where('group_name', '!=', '');
-    }
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'inactive') {
+                $query->where('status', 'inactive');
+            } else {
+                $query->whereHas('group', function($groupQuery) use ($request) {
+                    $groupQuery->where('name', $request->status);
+                });
+            }
+        }
 
-    if ($request->status == 'inactive') {
-        $query->where('status', 'inactive');
-    }
+        $linemen = $query->orderBy('last_name')->get();
 
-    $linemen = $query->orderBy('group_name')->orderBy('last_name')->get();
+      
+        $groups = Group::withCount('linemen')->get();
 
         
-        $regions = json_decode(file_get_contents(public_path('json/region.json')), true);
-        $provinces = json_decode(file_get_contents(public_path('json/province.json')), true);
+        $groupedLinemen = $linemen->groupBy(function($lineman) {
+            return $lineman->group ? $lineman->group->name : 'No Group';
+        });
+
+       
         $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
         $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-   $linemen->transform(function($lineman) use ($regions, $provinces, $cities, $barangays) {
-    $region = collect($regions)->firstWhere('region_code', $lineman->region_code);
-    $lineman->region_name = $region['region_name'] ?? $lineman->region_name ?? '';
+        $linemen->transform(function($lineman) use ( $cities, $barangays) {
+       
+            $city = collect($cities)->firstWhere('city_code', $lineman->city_code);
+            $lineman->city_name = $city['city_name'] ?? '';
 
-    $province = collect($provinces)->firstWhere('province_code', $lineman->province_code);
-    $lineman->province_name = $province['province_name'] ?? $lineman->province_name ?? '';
+            $barangay = collect($barangays)->firstWhere('brgy_code', $lineman->barangay_code);
+            $lineman->barangay_name = $barangay['brgy_name'] ?? '';
 
-    $city = collect($cities)->firstWhere('city_code', $lineman->city_code);
-    $lineman->city_name = $city['city_name'] ?? $lineman->city_name ?? '';
+            return $lineman;
+        });
 
-    $barangay = collect($barangays)->firstWhere('brgy_code', $lineman->barangay_code);
-    $lineman->barangay_name = $barangay['brgy_name'] ?? $lineman->barangay_name ?? '';
-
-    return $lineman;
-});
-
-        
-            return view('pages.reconnection', compact( 'linemen', 'availableCount'));
-        }
+        return view('pages.reconnection', compact('linemen', 'availableCount', 'groups', 'groupedLinemen'));
+    }
 }

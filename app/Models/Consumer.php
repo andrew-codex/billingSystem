@@ -1,18 +1,16 @@
 <?php
 
 namespace App\Models;
-use Schoolees\Psgc\Models\Region;
-use Schoolees\Psgc\Models\Province;
-use Schoolees\Psgc\Models\City;
-use Schoolees\Psgc\Models\Barangay;
-
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\ElectricMeter;  
- 
-class Consumer extends Model
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+class Consumer extends Authenticatable
 {
     use HasFactory;
+    use HasApiTokens;
 
     protected $appends = ['full_name', 'full_address'];
     public const STATUS_ACTIVE   = 'active';
@@ -33,6 +31,8 @@ class Consumer extends Model
         'status',
         'must_change_password',
     ];
+
+     protected $hidden = ['password'];
 
     public function electricMeters()
 {

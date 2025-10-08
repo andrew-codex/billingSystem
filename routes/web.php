@@ -18,6 +18,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\PasswordController;
 use App\Models\Consumer;
+use App\Http\Controllers\GroupNameController;
 
         Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
@@ -132,8 +133,12 @@ Route::put('/meters/{meter}/update', [ElectricMeterController::class, 'updateMet
                 Route::post('/linemen/{lineman}/archive', [LineManController::class, 'archive'])->name('linemen.archive');
                 Route::get('/linemen/{id}/profile', [LineManController::class, 'profile'])->name('linemen.profile');
                 Route::post('/linemen/update-group-name', [LineManController::class, 'updateGroupName'])->name('linemen.updateGroupName');
-
-
+                Route::post('/linemen/update-group-assignment', [LineManController::class, 'updateGroupAssignment'])->name('linemen.updateGroupAssignment');
+                Route::put('/linemen/{id}/change-group', [LineManController::class, 'changeGroup'])->name('linemen.changeGroup');
+                Route::get('/linemen/by-group/{groupId?}', [LineManController::class, 'getByGroup'])->name('linemen.byGroup');
+                Route::post('/groups', [GroupNameController::class, 'storeGroup'])->name('groups.store');
+                Route::put('/groups/{group}/update', [GroupNameController::class, 'updateGroup'])->name('groups.update');
+                Route::delete('/groups/{group}/delete', [GroupNameController::class, 'destroyGroup'])->name('groups.destroy');
         });
 
 

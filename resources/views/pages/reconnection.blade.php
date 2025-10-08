@@ -12,9 +12,10 @@
     @include('modals.add-lineMan')
 @include('modals.linemenProfile')
 @include('modals.edit-linemen')
-
+@include('modals.add-group')
 
   @include('includes.alerts')
+  @include('modals.manage-groups')
 
 <div class="content">
 
@@ -121,146 +122,165 @@
         </div>
       </div>
       <div class="tab-pane" id="linemen">
-
-            <div class="filters">
-
-                <div class="search-wrapper">
-                    <i class="fa fa-search search-icon"></i>
-                    <input type="search" id="searchInput"  placeholder="Search line men...">
-                </div>
-
-                <select id="statusFilter" class="filter-select">
-                      <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
-                      <option value="Group Name" {{ request('status') == 'Group Name' ? 'selected' : '' }}>Group Name</option>
-                      <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Disconnected</option>
-                </select>
-
-            </div>
-
-            @php
-                $groupedLinemen = $linemen->groupBy('group_name');
-            @endphp
-
-@foreach($groupedLinemen as $groupName => $group)
-    <div class="group-section">
-        <div class="group-header">
-            <div class="group-badge">
-                <i class="fa-solid fa-users"></i>
-                {{ $groupName ?? 'Individual Linemen' }}
-            </div>
-            <div class="group-count">
-                {{ $group->count() }} Members
-            </div>
+    <div class="filters">
+        <div class="search-wrapper">
+            <i class="fa fa-search search-icon"></i>
+            <input type="search" id="searchInput" placeholder="Search line men...">
         </div>
 
-        
+        <select id="statusFilter" class="filter-select">
+            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+            @if(isset($groups))
+                @foreach($groups as $group)
+                    <option value="{{ $group->group_name }}" {{ request('status') == $group->name ? 'selected' : '' }}>
+                        {{ $group->group_name }}
+                    </option>
+                @endforeach
+            @endif
+            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Disconnected</option>
+        </select>
 
-    <div class="card-grid fade-in">
-        @foreach($group as $lineman)
-                           <div class="card-grid fade-in">
-                  
-                          <div class="card">
-                              <div class="card-header">
-                                  @php
-                                      $initials = strtoupper(substr($lineman->first_name, 0, 1) . substr($lineman->last_name, 0, 1));
-                                  @endphp   
-                                  <div class="avatar">{{ $initials }}</div>
-                                  <div class="info">
-                                      <h3>{{$lineman->first_name}} {{$lineman->last_name}}</h3>
-                                      <p> ID: {{$lineman->id}}</p>
-                                  </div>
+        <div class="header-dropdown">
+            <button class="header-dropdown-toggle">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div class="header-menu">
+                <button onclick="openAddGroup()" style="color:#10b981;">
+                    <i class="fa-solid fa-users-plus"></i> Add Group
+                </button>
+                <button onclick="openManageGroups()" style="color:#3b82f6;">
+                    <i class="fa-solid fa-users-gear"></i> Manage Groups
+                </button>
+                <button onclick="exportLinemen()" style="color:#f59e0b;">
+                    <i class="fa-solid fa-file-export"></i> Export Data
+                </button>
+                <div class="dropdown-separator"></div>
+                <button onclick="openBulkActions()" style="color:#6b7280;">
+                    <i class="fa-solid fa-list-check"></i> Bulk Actions
+                </button>
+                <button onclick="openSettings()" style="color:#6b7280;">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </button>
+            </div>
+        </div>
+    </div>
 
-                       
+    @if(isset($groupedLinemen) && $groupedLinemen->count() > 0)
+        @foreach($groupedLinemen as $groupName => $groupLinemen)
+        <div class="group-section">
+            <div class="group-header">
+                <div class="group-badge">
+                    <i class="fa-solid fa-users"></i>
+                    <span>{{ $group->group_name }}</span>
+                </div>
+                <div class="group-count">
+                    {{ $groupLinemen->count() }} Members
+                </div>
+            </div>
 
-                                  <div class="header-dropdown">
-                                      <button class="header-dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                      <div class="header-menu">
-                                          @if($lineman->status === 'active')
-                                          
-                                              <form action="{{ route('linemen.deactivate', $lineman->id) }}" method="POST">
-                                                  @csrf
-                                                  <button type="submit" style="color:#ef4444;">
-                                                      <i class="fa-solid fa-user-minus"></i> Deactivate
-                                                  </button>
-                                              </form>
+            <div class="card-grid fade-in">
+                @foreach($groupLinemen as $lineman)
+                <div class="card">
+                    <div class="card-header">
+                        @php
+                            $initials = strtoupper(substr($lineman->first_name, 0, 1) . substr($lineman->last_name, 0, 1));
+                        @endphp   
+                        <div class="avatar">{{ $initials }}</div>
+                        <div class="info">
+                            <h3>{{ $lineman->first_name }} {{ $lineman->last_name }}</h3>
+                            <p>ID: {{ $lineman->id }}</p>
+                            @if($lineman->group)
+                                <p>Group: {{ $lineman->group->group_name }}</p> 
+                            @endif
+                        </div>
 
-                                              <button style="color:#22c55e;"  onclick="openEdit({{ $lineman->id }})"> <i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <div class="header-dropdown">
+                            <button class="header-dropdown-toggle">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="header-menu">
+                                @if($lineman->status === 'active')
+                                    <form action="{{ route('linemen.deactivate', $lineman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" style="color:#ef4444;">
+                                            <i class="fa-solid fa-user-minus"></i> Deactivate
+                                        </button>
+                                    </form>
 
+                                    <button style="color:#22c55e;" onclick="openEdit({{ $lineman->id }})">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
 
+                                    <form action="{{ route('linemen.onleave', $lineman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" style="color:#f59e0b;">
+                                            <i class="fa-solid fa-user-clock"></i> On Leave
+                                        </button>
+                                    </form>
 
+                                @elseif($lineman->status === 'inactive')
+                                    <form action="{{ route('linemen.activate', $lineman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" style="color:#16a34a;">
+                                            <i class="fa-solid fa-user-check"></i> Activate
+                                        </button>
+                                    </form>
 
-      
+                                    <form action="{{ route('linemen.archive', $lineman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" style="color:#6b7280;">
+                                            <i class="fa-solid fa-archive"></i> Archive
+                                        </button>
+                                    </form>
 
-
-
-                                        <form action="{{ route('linemen.onleave', $lineman->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" style="color:#f59e0b;">
-                                                <i class="fa-solid fa-user-clock"></i> On Leave
-                                            </button>
-                                        </form>
-
-                                    @elseif($lineman->status === 'inactive')
-                                
-                                        <form action="{{ route('linemen.activate', $lineman->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" style="color:#16a34a;">
-                                                <i class="fa-solid fa-user-check"></i> Activate
-                                            </button>
-                                        </form>
-
-                                        <form action="{{ route('linemen.archive', $lineman->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" style="color:#6b7280;">
-                                                <i class="fa-solid fa-archive"></i> Archive
-                                            </button>
-                                        </form>
-
-                                    @elseif($lineman->status === 'on_leave')
-                                        
-                                        <form action="{{ route('linemen.back_from_leave', $lineman->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" style="color:#16a34a;">
-                                                <i class="fa-solid fa-arrow-rotate-left"></i> Back from Leave
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
+                                @elseif($lineman->status === 'on_leave')
+                                    <form action="{{ route('linemen.back_from_leave', $lineman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" style="color:#16a34a;">
+                                            <i class="fa-solid fa-arrow-rotate-left"></i> Back from Leave
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
+                        </div>
+                    </div>
 
+                    <div class="card-body">
+                        <p><strong>Status:</strong> 
+                            <span class="status-badge status-{{ $lineman->status }}">
+                                {{ ucfirst(str_replace('_', ' ', $lineman->status)) }}
+                            </span>
+                        </p>
+                        <p><strong>Availability:</strong> 
+                            {{ $lineman->availability ? 'Available' : 'Busy' }}
+                        </p>
+                        @if($lineman->city_name)
+                            <p><strong>Location:</strong> {{ $lineman->city_name }}</p>
+                        @endif
+                    </div>
 
-
-                            </div>
-
-                              <div class="card-body">
-                           
-                              </div>
-
-                              <div class="card-footer">
-                                  <button class="btn-outline" onclick="openProfile({{ $lineman->id }})">
-                                      <i class="fa-solid fa-user"></i> View Profile
-                                  </button>
-                                 
-                              </div>
-                          </div>
-
-                     
-                
-                  </div>
+                    <div class="card-footer">
+                        <button class="btn-outline" onclick="openProfile({{ $lineman->id }})">
+                            <i class="fa-solid fa-user"></i> View Profile
+                        </button>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
         @endforeach
-    </div>
-    </div>
-@endforeach
-
-         
-
-  
-
-      </div>
-
+    @else
+        <div class="empty-state">
+            <i class="fa-solid fa-users"></i>
+            <h3>No Line Men Found</h3>
+            <p>Add some line men to get started.</p>
+            <button onclick="openAddLineMan()" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Add First Line Man
+            </button>
+        </div>
+    @endif
 </div>
-
-
+</div>
 
 
 

@@ -21,23 +21,27 @@ class LineMan extends Model
         'city_name','city_code',
         'barangay_name','barangay_code',
         'street',
-        'group_name',
+        'group_id',
         'status',
     ];
 
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+
     public function getFullAddressAttribute()
     {
-        $regions = collect(json_decode(file_get_contents(public_path('json/region.json')), true));
-        $provinces = collect(json_decode(file_get_contents(public_path('json/province.json')), true));
+   
         $cities = collect(json_decode(file_get_contents(public_path('json/city.json')), true));
         $barangays = collect(json_decode(file_get_contents(public_path('json/barangay.json')), true));
 
         $barangay = $barangays->firstWhere('brgy_code', $this->barangay_code)['brgy_name'] ?? null;
         $city = $cities->firstWhere('city_code', $this->city_code)['city_name'] ?? null;
-        $province = $provinces->firstWhere('province_code', $this->province_code)['province_name'] ?? null;
-        $region = $regions->firstWhere('region_code', $this->region_code)['region_name'] ?? null;
+     
 
-        return collect([$barangay, $city, $province, $region])
+        return collect([$barangay, $city])
             ->filter()
             ->join(', ');
     }

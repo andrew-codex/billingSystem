@@ -1,0 +1,677 @@
+<div id="manageGroupsModal" class="group-modal-overlay">
+    <div class="manage-groups-container">
+        <div class="manage-groups-header">
+            <div class="header-content">
+                <div class="modal-icon">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Manage Groups</h3>
+                    <p style="color:#f8fafc;">View, edit, and organize your line men groups</p>
+                </div>
+            </div>
+            <button type="button" class="group-close-btn" onclick="closeManageGroups()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="manage-groups-body">
+            <div class="groups-toolbar">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="groupSearch" placeholder="Search groups...">
+                </div>
+                <button class="btn-add-group" onclick="openAddGroup(); closeManageGroups();">
+                    <i class="fa-solid fa-plus"></i> New Group
+                </button>
+            </div>
+
+            <div class="groups-list" id="groupsList">
+                @if(isset($groups) && $groups->count() > 0)
+                    @foreach($groups as $group)
+                        <div class="group-item"
+                             data-group-id="{{ $group->id }}"
+                             data-group-name="{{ $group->group_name }}"
+                             data-group-description="{{ $group->description }}">
+                            <div class="group-info">
+                                <div class="group-avatar">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <div class="group-details">
+                                    <h4>{{ $group->group_name }}</h4>
+                                    <p class="group-description">{{ $group->description ?? 'No description' }}</p>
+                                    <span class="member-count">{{ $group->linemen_count ?? 0 }} members</span>
+                                </div>
+                            </div>
+                            <div class="group-actions">
+                                <button class="btn-icon" onclick="openEditGroup(this)" title="Edit Group">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button class="btn-icon btn-danger" onclick="confirmDeleteGroup({{ $group->id }}, '{{ addslashes($group->group_name) }}')" title="Delete Group">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="empty-groups">
+                        <i class="fa-solid fa-users-slash"></i>
+                        <h4>No Groups Found</h4>
+                        <p>Create your first group to organize line men</p>
+                        <button class="btn-primary" onclick="openAddGroup(); closeManageGroups();">
+                            <i class="fa-solid fa-plus"></i> Create First Group
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="editGroupModal" class="group-modal-overlay" style="display:none; z-index:6500;">
+    <div class="group-modal-container">
+        <div class="group-modal-header">
+            <div class="header-content">
+                <div class="modal-icon">
+                    <i class="fa-solid fa-pen"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Edit Group</h3>
+                    <p>Update group information</p>
+                </div>
+            </div>
+            <button type="button" class="group-close-btn" onclick="closeEditGroup()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="group-modal-body">
+            <form id="editGroupForm" method="POST" action="">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editGroupId" name="group_id">
+                <div class="input-wrapper">
+                    <label for="edit_group_name" class="input-label">
+                        <i class="fa-solid fa-tag"></i> Group Name
+                    </label>
+                    <input type="text" name="group_name" id="edit_group_name" class="group-input" required>
+                </div>
+                <div class="input-wrapper">
+                    <label for="edit_description" class="input-label">
+                        <i class="fa-solid fa-align-left"></i> Description
+                    </label>
+                    <textarea name="description" id="edit_description" class="group-textarea" rows="4"></textarea>
+                </div>
+                <div class="group-modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeEditGroup()">
+                        <i class="fa-solid fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-save"></i> Update Group
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+
+
+.group-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    z-index: 6500;
+}
+
+.group-modal-container {
+    padding-right: 1.25rem;
+    background: #1f2937;
+    width: 420px;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    animation: fadeInUp 0.3s ease;
+    border: 1px solid #374151;
+}
+
+
+.group-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111827;
+    padding: 1rem 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-icon {
+    background: #2563eb;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.header-text h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f9fafb;
+    margin: 0;
+}
+
+.header-text p {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin: 0;
+}
+
+
+.group-close-btn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.group-close-btn:hover {
+    color: #f9fafb;
+}
+
+
+.group-modal-body {
+    padding: 1.25rem;
+}
+
+.input-wrapper {
+    margin-bottom: 1rem;
+}
+
+.input-label {
+    display: block;
+    font-weight: 500;
+    color: #d1d5db;
+    margin-bottom: 0.35rem;
+}
+
+.input-label i {
+    margin-right: 6px;
+    color: #3b82f6;
+}
+
+.group-input,
+.group-textarea {
+    width: 100%;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.95rem;
+    color: #f9fafb;
+    background-color: #111827;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.group-input:focus,
+.group-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #1e293b;
+}
+
+
+.group-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-secondary {
+    background: #374151;
+    color: #d1d5db;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+    
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.swal2-container { z-index:10000 !important; }
+
+
+.manage-groups-container {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    color: #f8fafc;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.manage-groups-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    
+    border-bottom: 1px solid #334155;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.group-close-btn{
+    background: transparent;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.manage-groups-body {
+    padding: 0;
+    background: #1e293b;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+
+.groups-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 28px;
+    border-bottom: 1px solid #334155;
+    background: #1e293b;
+}
+
+.groups-toolbar .search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
+}
+
+.groups-toolbar .search-wrapper i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+}
+
+.groups-toolbar .search-wrapper input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #f1f5f9;
+    font-size: 14px;
+}
+
+.btn-add-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-group:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+}
+
+
+.groups-list {
+    padding: 0;
+}
+
+.group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 28px;
+    border-bottom: 1px solid #334155;
+    transition: background 0.2s;
+}
+
+.group-item:hover {
+    background: #334155;
+}
+
+.group-item:last-child {
+    border-bottom: none;
+}
+
+.group-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+}
+
+.group-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.group-details h4 {
+    margin: 0 0 4px 0;
+    color: #f8fafc;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.group-description {
+    margin: 0 0 8px 0;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.member-count {
+    background: #374151;
+    color: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+.group-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #374151;
+    background: transparent;
+    color: #94a3b8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #374151;
+    color: #f1f5f9;
+    transform: scale(1.05);
+}
+
+.btn-icon.btn-danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+}
+
+
+.empty-groups {
+    padding: 60px 28px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.empty-groups i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #64748b;
+}
+
+.empty-groups h4 {
+    margin: 0 0 8px 0;
+    color: #e2e8f0;
+    font-size: 18px;
+}
+
+.empty-groups p {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+}
+
+ 
+.group-modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    z-index: 6000;
+
+    background: rgba(15, 23, 42, 0.55); 
+
+    backdrop-filter: blur(2px); 
+    -webkit-backdrop-filter: blur(2px);
+    animation: none;
+}
+
+.group-modal-overlay.is-open {
+    display: flex;
+    animation: overlayFade .18s ease;
+}
+
+@keyframes overlayFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+
+.manage-groups-container,
+.group-modal-container {
+    transform: scale(.96);
+    opacity: 0;
+    animation: modalIn .22s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+@keyframes modalIn {
+    to { transform: scale(1); opacity: 1; }
+}
+
+
+.manage-groups-body {
+    overflow-y: auto;
+}
+
+
+.no-blur .group-modal-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(15,23,42,.72);
+}
+</style>
+
+<script>
+
+function openManageGroups() {
+    const m = document.getElementById('manageGroupsModal');
+    m.style.display = 'flex';
+    m.classList.add('is-open');
+}
+function closeManageGroups() {
+    const m = document.getElementById('manageGroupsModal');
+    m.style.display = 'none';
+    m.classList.remove('is-open');
+}
+function closeEditGroup() {
+    document.getElementById('editGroupModal').style.display = 'none';
+}
+
+
+function openEditGroup(btn) {
+    const item = btn.closest('.group-item');
+    if(!item) return;
+    const id = item.dataset.groupId;
+    const name = item.dataset.groupName || '';
+    const desc = item.dataset.groupDescription || '';
+
+    const form = document.getElementById('editGroupForm');
+    document.getElementById('editGroupId').value = id;
+    document.getElementById('edit_group_name').value = name;
+    document.getElementById('edit_description').value = desc;
+    form.action = `/groups/${id}`;
+    const overlay = document.getElementById('editGroupModal');
+    overlay.style.display = 'flex';
+    setTimeout(()=>document.getElementById('edit_group_name').focus(), 50);
+}
+
+
+function confirmDeleteGroup(id, group_name) {
+    if (!window.Swal) {
+        if (confirm(`Delete group "${group_name}"? This cannot be undone.`)) {
+            sendDelete(id);
+        }
+        return;
+    }
+    Swal.fire({
+        title: 'Delete Group?',
+        html: `Group: <strong>${group_name}</strong><br><small>This cannot be undone.</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Delete',
+        reverseButtons: true
+    }).then(res => {
+        if (res.isConfirmed) {
+            sendDelete(id);
+        }
+    });
+}
+
+function sendDelete(id) {
+    fetch(`/groups/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Deleted',
+                    text: data.message || 'Group removed.',
+                    icon: 'success',
+                    timer: 1400,
+                    showConfirmButton: false
+                }).then(()=>location.reload());
+            } else {
+                location.reload();
+            }
+        } else {
+            throw new Error(data.message || 'Delete failed');
+        }
+    })
+    .catch(e => {
+        if (window.Swal) {
+            Swal.fire('Error', e.message, 'error');
+        } else {
+            alert(e.message);
+        }
+    });
+}
+
+const searchInput = document.getElementById('groupSearch');
+if (searchInput) {
+    searchInput.addEventListener('input', e => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.group-item').forEach(item => {
+            const n = (item.dataset.groupName || '').toLowerCase();
+            const d = (item.dataset.groupDescription || '').toLowerCase();
+            item.style.display = (n.includes(term) || d.includes(term)) ? 'flex' : 'none';
+        });
+    });
+}
+
+
+document.addEventListener('click', e => {
+    const mg = document.getElementById('manageGroupsModal');
+    const eg = document.getElementById('editGroupModal');
+    if (e.target === mg) closeManageGroups();
+    if (e.target === eg) closeEditGroup();
+});
+
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeEditGroup();
+        closeManageGroups();
+    }
+});
+</script>
