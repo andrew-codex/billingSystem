@@ -124,59 +124,5 @@ class LineManController extends Controller
         return back()->with('success', 'Lineman archived.');
     }
 
-    // Updated function to work with group_id instead of group_name
-    public function updateGroupAssignment(Request $request)
-    {
-        $request->validate([
-            'lineman_ids' => 'required|array',
-            'lineman_ids.*' => 'exists:line_men,id',
-            'new_group_id' => 'nullable|exists:groups,id',
-        ]);
-
-        LineMan::whereIn('id', $request->lineman_ids)
-            ->update(['group_id' => $request->new_group_id]);
-
-        $groupName = $request->new_group_id ? Group::find($request->new_group_id)->name : 'No Group';
-        
-        return back()->with('success', 'Linemen assigned to ' . $groupName . ' successfully.');
-    }
-
-    // New function to move linemen between groups
-    public function changeGroup(Request $request, $id)
-    {
-        $request->validate([
-            'group_id' => 'nullable|exists:groups,id',
-        ]);
-
-        $lineman = LineMan::findOrFail($id);
-        $oldGroup = $lineman->group ? $lineman->group->name : 'No Group';
-        
-        $lineman->update([
-            'group_id' => $request->group_id
-        ]);
-
-        $newGroup = $request->group_id ? Group::find($request->group_id)->name : 'No Group';
-
-        return back()->with('success', $lineman->first_name . ' moved from ' . $oldGroup . ' to ' . $newGroup);
-    }
-
     
-    public function getByGroup($groupId = null)
-    {
-        if ($groupId) {
-            $linemen = LineMan::where('group_id', $groupId)->with('group')->get();
-            $group = Group::find($groupId);
-            return response()->json([
-                'linemen' => $linemen,
-                'group' => $group
-            ]);
-        } else {
-            $linemen = LineMan::whereNull('group_id')->get();
-            return response()->json([
-                'linemen' => $linemen,
-                'group' => null
-
-            ]);
-        }
-    }
 }

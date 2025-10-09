@@ -125,19 +125,18 @@
     <div class="filters">
         <div class="search-wrapper">
             <i class="fa fa-search search-icon"></i>
-            <input type="search" id="searchInput" placeholder="Search line men...">
+            <input type="search" id="linemenSearch" placeholder="Search line men...">  
         </div>
 
-        <select id="statusFilter" class="filter-select">
-            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+        <select id="groupFilter" name="group" class="filter-select">
+            <option value="all" {{ request('group') === 'all' || !request()->has('group') ? 'selected' : '' }}>All Groups</option>
             @if(isset($groups))
                 @foreach($groups as $group)
-                    <option value="{{ $group->group_name }}" {{ request('status') == $group->name ? 'selected' : '' }}>
+                    <option value="{{ $group->group_name }}" {{ request('group') == $group->group_name ? 'selected' : '' }}>
                         {{ $group->group_name }}
                     </option>
                 @endforeach
             @endif
-            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Disconnected</option>
         </select>
 
         <div class="header-dropdown">
@@ -146,41 +145,35 @@
             </button>
             <div class="header-menu">
                 <button onclick="openAddGroup()" style="color:#10b981;">
-                    <i class="fa-solid fa-users-plus"></i> Add Group
+                    <i class="fa-solid fa-plus"></i>  Add Group
                 </button>
                 <button onclick="openManageGroups()" style="color:#3b82f6;">
                     <i class="fa-solid fa-users-gear"></i> Manage Groups
-                </button>
-                <button onclick="exportLinemen()" style="color:#f59e0b;">
-                    <i class="fa-solid fa-file-export"></i> Export Data
-                </button>
-                <div class="dropdown-separator"></div>
-                <button onclick="openBulkActions()" style="color:#6b7280;">
-                    <i class="fa-solid fa-list-check"></i> Bulk Actions
-                </button>
-                <button onclick="openSettings()" style="color:#6b7280;">
-                    <i class="fa-solid fa-gear"></i> Settings
                 </button>
             </div>
         </div>
     </div>
 
-    @if(isset($groupedLinemen) && $groupedLinemen->count() > 0)
-        @foreach($groupedLinemen as $groupName => $groupLinemen)
-        <div class="group-section">
-            <div class="group-header">
-                <div class="group-badge">
-                    <i class="fa-solid fa-users"></i>
-                    <span>{{ $group->group_name }}</span>
-                </div>
-                <div class="group-count">
-                    {{ $groupLinemen->count() }} Members
-                </div>
+@if(isset($groupedLinemen) && $groupedLinemen->count() > 0)
+    @foreach($groupedLinemen as $groupName => $groupLinemen)
+    <div class="group-section" data-group="{{ $groupName ?: 'No Group' }}">
+        <div class="group-header">
+            <div class="group-badge">
+                <i class="fa-solid fa-users"></i>
+                <span>{{ $groupName ?: 'No Group' }}</span>
             </div>
+            <div class="group-count">
+                {{ $groupLinemen->count() }} Members
+            </div>
+        </div>
 
             <div class="card-grid fade-in">
                 @foreach($groupLinemen as $lineman)
-                <div class="card">
+                <div class="card"
+                data-name="{{ $lineman->first_name }} {{ $lineman->last_name }}"
+                 data-id="{{ $lineman->id }}"
+                 data-group="{{ $lineman->group->group_name ?? 'No Group' }}"
+                 @if(!empty($lineman->city_name)) data-city="{{ $lineman->city_name }}" @endif>
                     <div class="card-header">
                         @php
                             $initials = strtoupper(substr($lineman->first_name, 0, 1) . substr($lineman->last_name, 0, 1));
@@ -209,6 +202,10 @@
 
                                     <button style="color:#22c55e;" onclick="openEdit({{ $lineman->id }})">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+
+                                    <button  onclick="openProfile({{ $lineman->id }})">
+                                        <i class="fa-solid fa-user"></i> View Profile
                                     </button>
 
                                     <form action="{{ route('linemen.onleave', $lineman->id) }}" method="POST">
@@ -259,11 +256,7 @@
                         @endif
                     </div>
 
-                    <div class="card-footer">
-                        <button class="btn-outline" onclick="openProfile({{ $lineman->id }})">
-                            <i class="fa-solid fa-user"></i> View Profile
-                        </button>
-                    </div>
+             
                 </div>
                 @endforeach
             </div>
@@ -373,7 +366,44 @@ document.addEventListener('DOMContentLoaded', attachHeaderToggle);
 
 
 
+function applyLinemenFilters() {
+  const searchEl = document.getElementById('linemenSearch');
+  const groupEl = document.getElementById('groupFilter');
+  const term = (searchEl?.value || '').trim().toLowerCase();
+  const selectedGroup = (groupEl?.value || 'all').toLowerCase();
 
+  document.querySelectorAll('.group-section').forEach(section => {
+    const sectionGroup = (section.dataset.group || '').toLowerCase();
+    let visible = 0;
+
+    section.querySelectorAll('.card').forEach(card => {
+      const name = (card.dataset.name || '').toLowerCase();
+      const id = (card.dataset.id || '').toLowerCase();
+      const city = (card.dataset.city || '').toLowerCase();
+      const cardGroup = (card.dataset.group || sectionGroup).toLowerCase();
+
+      const matchGroup = selectedGroup === 'all' || cardGroup === selectedGroup;
+      const matchTerm = !term || name.includes(term) || id.includes(term) || city.includes(term);
+
+      const show = matchGroup && matchTerm;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    section.style.display = visible ? '' : 'none';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchEl = document.getElementById('linemenSearch');
+  const groupEl = document.getElementById('groupFilter');
+
+  if (searchEl) searchEl.addEventListener('input', applyLinemenFilters);
+  if (groupEl) groupEl.addEventListener('change', applyLinemenFilters);
+
+
+  applyLinemenFilters();
+});
 
 
 

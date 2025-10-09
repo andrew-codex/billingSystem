@@ -131,6 +131,27 @@ public function updateMeter(Request $request, ElectricMeter $meter)
 
 
 
+public function toggleStatus(ElectricMeter $meter)
+{
+    
+    if ($meter->status === 'active') {
+        $meter->status = 'disconnected';
+    } elseif ($meter->status === 'disconnected') {
+        $meter->status = 'active';
+    } else {
+ 
+        return back()->with('error', 'Only active or disconnected meters can be toggled.');
+    }
+
+    $meter->save();
+
+    return back()->with('success', 'Meter status updated successfully.');
+}
+
+
+
+
+
   
 
 

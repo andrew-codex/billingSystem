@@ -34,6 +34,8 @@ class Consumer extends Authenticatable
 
      protected $hidden = ['password'];
 
+ 
+
     public function electricMeters()
 {
     return $this->hasMany(ElectricMeter::class);

@@ -20,7 +20,6 @@
     @include('modals.edit-consumer')
     @include('modals.archived-consumer')
     @include('modals.assignNew-meter')
-    <!-- @include('modals.meter-history') -->
 <div class="content">
 
 
@@ -52,105 +51,146 @@
                                 <option value="industrial" {{ request('house_type') == 'industrial' ? 'selected' : '' }}>Industrial</option>
                             </select>
 
+                          
+                            <select id="statusFilter" class="filter-select">
+                                <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Meters Status</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="disconnected" {{ request('status') == 'disconnected' ? 'selected' : '' }}>Disconnected</option>
+                            </select>
 
-                                   <div class="menu-dropdown">
-                                        <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                        <div class="header-menu">
-                                             <button onclick="openArchivedConsumer()"><i class="fa-solid fa-box-archive"></i> Archived List</button>
-                                        </div>
-                                    </div>
-
-
+                         <div class="menu-dropdown">
+                                <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                                <div class="header-menu">
+                                    <button onclick="openArchivedConsumer()"><i class="fa-solid fa-box-archive"></i> Archived List</button>
+                                </div>
+                         </div>
                      </div>
 
         
         
         <div class="consumer-table-wrapper">
-<table class="consumer-table">
-    <thead>
-        <tr>
-            <th></th>
-            <th>Consumer</th>
-            <th>Meter Number</th>
-            <th>Address</th>
-            <th>House Type</th>
-            <th>Last Reading</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody id="consumersTables">
-        @foreach($consumers as $consumer)
-       
-        <tr class="consumer-row">
-            <td class="accordion-cell">
-                <button class="accordion-toggle" onclick="toggleMeters({{ $consumer->id }}, this)">
-                    <i class="fa fa-chevron-right"></i>
-                </button>
-            </td>
-            <td>
-                <div class="consumer-info">
-                    <strong>{{ $consumer->full_name }}</strong><br>
-                    <small>ID: {{ $consumer->id }}</small>
-                </div>
-            </td>
-            <td>-</td>
-            <td>{{ $consumer->city_name }}</td>
-           <td>
-                        @if($consumer->electricMeters->isNotEmpty())
-              -
-            @else
-                <em>No meter assigned</em>
-            @endif
-           </td>
-            <td>-</td>
-            <td>
-                <span class="badge {{ $consumer->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
-                    {{ ucfirst($consumer->status) }}
-                </span>
-            </td>
-            <td>
+            <table class="consumer-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Consumer</th>
+                        <th>Meter Number</th>
+                        <th>Address</th>
+                        <th>House Type</th>
+                        <th>Last Reading</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="consumersTables">
+                    @foreach($consumers as $consumer)
                 
-                <div class="menu-dropdown">
-                    <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                    <div class="header-menu">
-                        <button style="color:#22c55e;" onclick="openEditConsumer({{ $consumer->id }})">  <i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <form action="{{ route('consumer.archived', $consumer->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <button type="submit" style="color:#ef4444;"> <i class="fa-solid fa-user-minus"></i> Archive</button>
-                        </form>
-                        <button onclick="openAssignModal({{ $consumer->id }})"><i class="fa fa-bolt"></i> Assign Meter</button>
-                    </div>
-                </div>
-               
-            </td>
-        </tr>
+                    <tr class="consumer-row">
+                        <td class="accordion-cell">
+                            <button class="accordion-toggle" onclick="toggleMeters({{ $consumer->id }}, this)">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <div class="consumer-info">
+                                <strong>{{ $consumer->full_name }}</strong><br>
+                                <small>ID: {{ $consumer->id }}</small>
+                            </div>
+                        </td>
+                        <td>-</td>
+                        <td>{{ $consumer->city_name }}</td>
+                    <td>
+                                    @if($consumer->electricMeters->isNotEmpty())
+                        -
+                        @else
+                            <em>No meter assigned</em>
+                        @endif
+                    </td>
+                        <td>-</td>
+                        <td>
+                    -
+                        </td>
+                        <td>
+                            
+                            <div class="menu-dropdown">
+                                <button class="dropdown-toggle"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                                <div class="header-menu">
 
-      
-    @foreach($consumer->electricMeters as $meter)
-            <tr class="meter-row child-of-{{ $consumer->id }}" style="display:none;">
-                <td></td>
-                <td>{{ $consumer->full_name }}</td>
-                <td>{{ $meter->electric_meter_number }}</td>
-                <td>{{ $consumer->city_name }}</td>
-                <td>{{ $meter->house_type }}</td>
-                <td>{{ $meter->last_reading ?? '0 kWh' }}</td>
-                <td>
-                    <span class="badge {{ $meter->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
-                        {{ ucfirst($meter->status) }}
+                    
+
+                                <form action="{{ route('consumer.archived', $consumer->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" style="color:#ef4444;">
+                                        <i class="fa-solid fa-user-minus"></i> Archive
+                                    </button>
+                                </form>
+
+                                <button onclick="openAssignModal({{ $consumer->id }})">
+                                    <i class="fa fa-bolt"></i> Assign Meter
+                                </button>
+
+                                <button onclick="openEditConsumer({{ $consumer->id }})">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </div>
+                            </div>
+                        
+                        </td>
+                    </tr>
+
+                
+                @foreach($consumer->electricMeters as $meter)
+                        <tr class="meter-row child-of-{{ $consumer->id }}" style="display:none;">
+                            <td></td>
+                            <td>{{ $consumer->full_name }}</td>
+                            <td>{{ $meter->electric_meter_number }}</td>
+                            <td>{{ $consumer->city_name }}</td>
+                            <td>{{ $meter->house_type }}</td>
+                            <td>{{ $meter->last_reading ?? '0 kWh' }}</td>
+
+            <td>
+                @if ($meter->status === 'active')
+                    <span class="badge badge-active">
+                        <i class="fa-solid fa-bolt"></i> Active
                     </span>
-                </td>
+                @elseif ($meter->status === 'disconnected')
+                    <span class="badge badge-inactive">
+                        <i class="fa-solid fa-plug-circle-xmark"></i> Disconnected
+                    </span>
+                @endif
+            </td>
+
                 <td>
-                    @if($meter->status == 'active')
                         <div class="menu-dropdown">
                             <button class="dropdown-toggle">
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
                             <div class="header-menu">
+
+              
                                 <a href="{{ route('meters.transfer.form', $meter->id) }}" style="color:#2563eb;">
                                     <i class="fa-solid fa-right-left"></i> Transfer/Replace
                                 </a>
+
+                                <form id="toggle-meter-form-{{ $meter->id }}" 
+                                    action="{{ route('meters.statusToggle', $meter->id) }}" 
+                                    method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button type="submit"
+                                        class="btn btn-sm d-flex align-items-center gap-1 
+                                            {{ $meter->status === 'active' ? 'btn-danger' : 'btn-success' }}"
+                                        {{ in_array($meter->status, ['unassigned','damaged']) ? 'disabled' : '' }}>
+                                        
+                                        @if ($meter->status === 'active')
+                                            <i class="fas fa-plug-circle-xmark"></i> Disconnect
+                                        @elseif ($meter->status === 'disconnected')
+                                            <i class="fas fa-plug-circle-check"></i> Activate
+                                        @endif
+                                    </button>
+                                </form>
+
                                 <button style="color:#22c55e;" onclick="openEditMeter({{ $meter->id }})">
                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                 </button>
@@ -189,24 +229,23 @@
                                 </form>
                             </div>
                         </div>
-                    @endif
-                </td>
+                    </td>
+                </tr>
+            @endforeach
             </tr>
-        @endforeach
-        </tr>
 
-        @endforeach
-    </tbody>
-</table>
+            @endforeach
+        </tbody>
+    </table>
 
 
 
  
-            <div id="editModalsWrapper">
-                @foreach($consumers as $consumer)
-                    @include('modals.edit-consumer', ['consumer' => $consumer])
-                @endforeach
-            </div>
+                            <div id="editModalsWrapper">
+                                @foreach($consumers as $consumer)
+                                    @include('modals.edit-consumer', ['consumer' => $consumer])
+                                @endforeach
+                            </div>
                             <div id="noDataMessage" class="no-data-message" style="display: {{ $consumers->isEmpty() ? 'block' : 'none' }}">
                             <i class="fa-solid fa-users-slash"></i> No consumers available.
                         </div>
@@ -252,11 +291,8 @@
 </div>
     
 
-
-
-    <script>
-
-function setupMeterForm(id) {
+<script>
+    function setupMeterForm(id) {
     const form = document.querySelector(`#edit-meter-${id} form`);
     const originalDate = form.querySelector('input[name="installation_date"]').value;
     const originalType = form.querySelector('select[name="house_type"]').value;
@@ -347,6 +383,8 @@ function openEditConsumer(id) {
 
 
 
+
+
 function closeEditConsumer(id) {
     const modal = document.getElementById(`edit-consumer-${id}`);
     const form = document.getElementById(`editConsumerForm-${id}`);
@@ -366,11 +404,7 @@ function closeEditConsumer(id) {
         });
         
       
-        const citySelect = document.getElementById(`city-${id}`);
-        const barangaySelect = document.getElementById(`barangay-${id}`);
-        
-        if (citySelect) citySelect.selectedIndex = 0;
-        if (barangaySelect) barangaySelect.selectedIndex = 0;
+   
     }
     
    
@@ -440,57 +474,50 @@ document.addEventListener('DOMContentLoaded', attachHeaderDropdown);
 $(document).ready(function() {
     let debounceMain;
 
-    function fetchMainData(page_main = 1) {
-        let searchConsumer = $('#searchInput').val();
-        let status = $('#statusFilter').val();
-        let house_type = $('#houseTypeFilter').val();
+    function fetchMainData(page = 1) {
+        const searchConsumer = $('#searchInput').val() || '';
+        const status = $('#statusFilter').val() || 'all';
+        const house_type = $('#houseTypeFilter').val() || 'all';
 
         $.ajax({
             url: "{{ route('consumer.index') }}",
             type: "GET",
-            data: { searchConsumer: searchConsumer, status: status, house_type: house_type, page_main: page_main },
+            dataType: "html",
+         
+            data: { searchConsumer, status, house_type, page },
             success: function(response) {
-                $('#consumersTables').html($(response.html).find('#consumersTables').html());
-                    $('#editModalsWrapper').html($(response.html).find('#editModalsWrapper').html());
-                $('.main-pagination').html($(response.html).find('.main-pagination').html());
-                
-
-                
-                attachHeaderDropdown(); 
+                const $html = $(response);
+                $('#consumersTables').html($html.find('#consumersTables').html());
+                $('#editModalsWrapper').html($html.find('#editModalsWrapper').html());
+                $('.main-pagination').html($html.find('.main-pagination').html());
+                attachHeaderDropdown();
+            },
+            error: function(xhr) {
+                console.error('Fetch failed', xhr.status, xhr.responseText);
             }
         });
     }
 
-  
+   
     $('#searchInput').on('keyup', function() {
         clearTimeout(debounceMain);
-        debounceMain = setTimeout(fetchMainData, 400);
+        debounceMain = setTimeout(fetchMainData, 300);
     });
-
-  
-    $('#statusFilter , #houseTypeFilter').on('change', function() {
-        fetchMainData();
-    });
-
 
    
+    $('#houseTypeFilter, #statusFilter').on('change', function() {
+        fetchMainData(1);
+    });
+
     $(document).on('click', '.main-pagination a', function(e) {
         e.preventDefault();
-        let page_main = $(this).attr('href').split('page_main=')[1] || 1;
-        fetchMainData(page_main);
-       
+        const url = new URL(this.href, window.location.origin);
+        const page = url.searchParams.get('page') || 1;
+        fetchMainData(page);
     });
 });
 
-
-
-
-
-
-
-
-
-    </script>
+</script>
     
 </body>
 </html>

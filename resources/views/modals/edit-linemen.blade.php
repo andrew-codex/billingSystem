@@ -44,13 +44,14 @@
                 </div>
 
 <div class="form-group">
-    <label for="group_id">Group Name</label>
-    <select name="group_id" id="group_id" class="select">
+    <label for="group_id_{{ $lineman->id }}">Group Name</label>
+    <select style="width: 85%;" name="group_id" id="group_id_{{ $lineman->id }}" class="select">
         <option value="">-- Select Group --</option>
         @foreach($groups as $group)
-            <option value="{{ $group->id }}" {{ old('group_id') == $group->id ? 'selected' : '' }}>
+            <option value="{{ $group->id }}"
+                {{ (string) old('group_id', $lineman->group_id) === (string) $group->id ? 'selected' : '' }}>
                 {{ $group->group_name }}
-            </option>   
+            </option>
         @endforeach
     </select>
     @error('group_id') <small class="text-danger">{{ $message }}</small> @enderror
@@ -65,7 +66,7 @@
                 
                 <div class="form-group">
                         <label>City</label>
-                        <select class="select" id="city-{{ $lineman->id }}" name="city_code" class="address-select city-select">
+                        <select style="width: 85%;" class="select" id="city-{{ $lineman->id }}" name="city_code" class="address-select city-select">
                             <option value="">Choose City</option>
                         </select>
                         <input type="hidden" name="city_name" id="city_name_{{ $lineman->id }}">
@@ -73,11 +74,12 @@
 
                 <div class="form-group">
                     <label>Barangay</label>
-                        <select class="select" id="barangay-{{ $lineman->id }}" name="barangay_code" class="address-select barangay-select">
+                        <select style="width: 85%;" class="select" id="barangay-{{ $lineman->id }}" name="barangay_code" class="address-select barangay-select">
                             <option value="">Choose Barangay</option>
                         </select>
                         <input type="hidden" name="barangay_name" id="barangay_name_{{ $lineman->id }}">
                 </div>
+
                 <div class="form-group">
                     <label for="street_{{ $lineman->id }}">Street / Prk</label>
                     <input type="text" name="street" id="street_{{ $lineman->id }}" value="{{ old('street', $lineman->street) }}">

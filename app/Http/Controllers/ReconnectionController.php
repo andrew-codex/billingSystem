@@ -19,8 +19,8 @@ class ReconnectionController extends Controller
             $query->where(function($q) use ($request) {
                 $q->where('first_name', 'like', '%' . $request->search . '%')
                   ->orWhere('last_name', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('group', function($groupQuery) use ($request) {
-                      $groupQuery->where('name', 'like', '%' . $request->search . '%');
+                  ->orWhereHas('group', function($g) use ($request) {
+                      $g->where('group_name', 'like', '%' . $request->search . '%');
                   });
             });
         }
@@ -29,28 +29,30 @@ class ReconnectionController extends Controller
             if ($request->status === 'inactive') {
                 $query->where('status', 'inactive');
             } else {
-                $query->whereHas('group', function($groupQuery) use ($request) {
-                    $groupQuery->where('name', $request->status);
+                $query->whereHas('group', function($g) use ($request) {
+                    $g->where('group_name', $request->status);
                 });
             }
         }
 
         $linemen = $query->orderBy('last_name')->get();
 
-      
-        $groups = Group::withCount('linemen')->get();
-
-        
-        $groupedLinemen = $linemen->groupBy(function($lineman) {
-            return $lineman->group ? $lineman->group->name : 'No Group';
-        });
+        $groups = Group::select('id','group_name')
+            ->withCount('linemen')
+            ->orderBy('group_name')
+            ->get();
 
        
+        $groupedLinemen = $linemen->groupBy(function($lineman) {
+            return $lineman->group && $lineman->group->group_name
+                ? $lineman->group->group_name
+                : 'No Group'; 
+        });
+
         $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
         $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-        $linemen->transform(function($lineman) use ( $cities, $barangays) {
-       
+        $linemen->transform(function($lineman) use ($cities, $barangays) {
             $city = collect($cities)->firstWhere('city_code', $lineman->city_code);
             $lineman->city_name = $city['city_name'] ?? '';
 

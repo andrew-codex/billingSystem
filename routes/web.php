@@ -18,30 +18,36 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\PasswordController;
 use App\Models\Consumer;
+use App\Http\Controllers\Auth\CustomForgotPasswordController;
+use App\Http\Controllers\Auth\CustomResetPasswordController;
 use App\Http\Controllers\GroupNameController;
+use App\Http\Controllers\Auth\OtpPasswordResetController;
 
         Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+
+Route::get('/forgot-password', function() {
+    return view('auth.forgot-password');
+})->name('password.forgot');
+
+Route::get('/reset-password', function() {
+    return view('auth.reset-password');
+})->name('password.reset.form');
+
+Route::post('/password/request-otp', [OtpPasswordResetController::class, 'requestOtp'])->name('password.request.otp');
+Route::post('/password/resend-otp', [OtpPasswordResetController::class, 'resendOtp'])->name('password.resend.otp');
+Route::post('/password/reset', [OtpPasswordResetController::class, 'resetPassword'])->name('password.reset');
+
+
+
         Route::get('/password/change', [PasswordController::class, 'showChangeForm'])->name('password.change');
         Route::post('/password/change', [PasswordController::class, 'update'])->name('password.change.update');
-
-
-
-
         Route::get('/permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('permissions.edit');
         Route::put('/permissions/{role}/update', [RolePermissionController::class, 'update'])->name('permissions.update');
+        
         Route::middleware(['auth', 'force.password.change'])->group(function () {
-
-
-
-
-
-
-
-        
-        
                 Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
 
                 Route::get('/consumerIndex',[ConsumerController::class, 'index'])->name('consumer.index');
@@ -77,20 +83,22 @@ use App\Http\Controllers\GroupNameController;
                 Route::put('/consumer-archived/{id}', [ConsumerController::class, 'archived'])->name('consumer.archived');
                 Route::put('/consumer-restore/{id}', [ConsumerController::class, 'unArchived'])->name('consumer.unArchived');
                 Route::delete('/consumer/{id}', [ConsumerController::class, 'destroyConsumer'])->name('consumer.destroy');
-                Route::patch('/consumer/toggle-status/{id}', [ConsumerController::class, 'statusToggle'])->name('consumer.toggleStatus');
 
-        Route::get('/meters/{meter}/transfer', [ConsumerMeterHistoryController::class, 'transferForm'])->name('meters.transfer.form');
-        Route::post('/meters/{meter}/transfer-or-replace', [ConsumerMeterHistoryController::class, 'transferOrReplace'])
-        ->name('meters.transferOrReplace');
+
+                Route::get('/meters/{meter}/transfer', [ConsumerMeterHistoryController::class, 'transferForm'])->name('meters.transfer.form');
+                Route::post('/meters/{meter}/transfer-or-replace', [ConsumerMeterHistoryController::class, 'transferOrReplace'])
+                ->name('meters.transferOrReplace');
+    
+
  
-Route::post('/consumers/{consumer}/assign-meter', [ConsumerMeterHistoryController::class, 'assignMeter'])->name('meters.assign');
+                Route::post('/consumers/{consumer}/assign-meter', [ConsumerMeterHistoryController::class, 'assignMeter'])->name('meters.assign');
 
 
 
 
 
-        Route::get('/consumers/{consumer}/meter-history/recent', [ConsumerMeterHistoryController::class, 'recent']);
-        Route::get('/meter-history', [ConsumerMeterHistoryController::class, 'index'])->name('meter-history.index');
+                Route::get('/consumers/{consumer}/meter-history/recent', [ConsumerMeterHistoryController::class, 'recent']);
+                Route::get('/meter-history', [ConsumerMeterHistoryController::class, 'index'])->name('meter-history.index');
 
 
         
@@ -110,15 +118,16 @@ Route::post('/consumers/{consumer}/assign-meter', [ConsumerMeterHistoryControlle
 
                 Route::delete('/electricMeter/{id}', [ElectricMeterController::class, 'destroy'])->name('electricMeter.destroy');
                 Route::delete('/electricMeterbulkDelete', [ElectricMeterController::class, 'bulkDelete'])->name('electricMeter.bulkDelete');
-       
+                Route::patch('/meters/toggle-status/{meter}', [ElectricMeterController::class, 'toggleStatus'])
+               ->name('meters.statusToggle');
 
-Route::put('/meters/{meter}/update', [ElectricMeterController::class, 'updateMeter'])->name('meters.update');
+                Route::put('/meters/{meter}/update', [ElectricMeterController::class, 'updateMeter'])->name('meters.update');
 
                 Route::get('/brownoutSched', [BrownoutScheduling::class, 'index'])->name('BrownoutScheduling.index');
                 Route::post('/storeSchedule', [BrownoutScheduling::class, 'storeSchedule'])->name('store.schedule');
                 Route::put('/brownoutSchedUpdate/{id}' , [BrownoutScheduling::class, 'updateSchedule'])->name('schedule.update');
                 Route::put('/schedule/{id}/cancel', [BrownoutScheduling::class, 'cancel'])->name('schedule.cancel');
-               Route::put('/schedule/{id}/archive', [BrownoutScheduling::class, 'archive'])->name('schedule.archive');
+                Route::put('/schedule/{id}/archive', [BrownoutScheduling::class, 'archive'])->name('schedule.archive');
 
                 Route::get('/reconnection', [ReconnectionController::class, 'index'])->name('reconnection.index');
 
@@ -138,7 +147,12 @@ Route::put('/meters/{meter}/update', [ElectricMeterController::class, 'updateMet
                 Route::get('/linemen/by-group/{groupId?}', [LineManController::class, 'getByGroup'])->name('linemen.byGroup');
                 Route::post('/groups', [GroupNameController::class, 'storeGroup'])->name('groups.store');
                 Route::put('/groups/{group}/update', [GroupNameController::class, 'updateGroup'])->name('groups.update');
-                Route::delete('/groups/{group}/delete', [GroupNameController::class, 'destroyGroup'])->name('groups.destroy');
-        });
+         
+
+                        Route::delete('/groups/{group}', [GroupNameController::class, 'destroyGroup'])
+                        ->name('groups.destroyGroup');
+
+
+                                });
 
 
