@@ -1,6 +1,4 @@
 <?php
-
-
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConsumerController;
@@ -23,30 +21,36 @@ use App\Http\Controllers\Auth\CustomResetPasswordController;
 use App\Http\Controllers\GroupNameController;
 use App\Http\Controllers\Auth\OtpPasswordResetController;
 
+
+
+
         Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
-Route::get('/forgot-password', function() {
-    return view('auth.forgot-password');
-})->name('password.forgot');
+        Route::get('/password/forgot', [OtpPasswordResetController::class, 'showForgot'])
+        ->name('password.forgot');
 
-Route::get('/reset-password', function() {
-    return view('auth.reset-password');
-})->name('password.reset.form');
-
-Route::post('/password/request-otp', [OtpPasswordResetController::class, 'requestOtp'])->name('password.request.otp');
-Route::post('/password/resend-otp', [OtpPasswordResetController::class, 'resendOtp'])->name('password.resend.otp');
-Route::post('/password/reset', [OtpPasswordResetController::class, 'resetPassword'])->name('password.reset');
+        Route::get('/password/request-otp', function () {
+        return redirect()->route('password.forgot');
+        });
 
 
+        Route::get('/reset-password', [OtpPasswordResetController::class, 'showReset'])
+        ->name('password.reset.form');
 
-        Route::get('/password/change', [PasswordController::class, 'showChangeForm'])->name('password.change');
-        Route::post('/password/change', [PasswordController::class, 'update'])->name('password.change.update');
-        Route::get('/permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('permissions.edit');
-        Route::put('/permissions/{role}/update', [RolePermissionController::class, 'update'])->name('permissions.update');
-        
+                Route::post('/password/request-otp', [OtpPasswordResetController::class, 'requestOtp'])->name('password.request.otp');
+                Route::post('/password/resend-otp', [OtpPasswordResetController::class, 'resendOtp'])->name('password.resend.otp');
+                Route::post('/password/reset', [OtpPasswordResetController::class, 'resetPassword'])->name('password.reset');
+
+
+
+                Route::get('/password/change', [PasswordController::class, 'showChangeForm'])->name('password.change');
+                Route::post('/password/change', [PasswordController::class, 'update'])->name('password.change.update');
+                Route::get('/permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('permissions.edit');
+                Route::put('/permissions/{role}/update', [RolePermissionController::class, 'update'])->name('permissions.update');
+                
         Route::middleware(['auth', 'force.password.change'])->group(function () {
                 Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
 
@@ -147,12 +151,9 @@ Route::post('/password/reset', [OtpPasswordResetController::class, 'resetPasswor
                 Route::get('/linemen/by-group/{groupId?}', [LineManController::class, 'getByGroup'])->name('linemen.byGroup');
                 Route::post('/groups', [GroupNameController::class, 'storeGroup'])->name('groups.store');
                 Route::put('/groups/{group}/update', [GroupNameController::class, 'updateGroup'])->name('groups.update');
-         
-
-                        Route::delete('/groups/{group}', [GroupNameController::class, 'destroyGroup'])
-                        ->name('groups.destroyGroup');
+                Route::delete('/groups/{group}', [GroupNameController::class, 'destroyGroup'])->name('groups.destroyGroup');
 
 
-                                });
+        });
 
 

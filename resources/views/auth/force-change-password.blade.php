@@ -91,7 +91,7 @@
         margin-top: 8px;
         font-size: 13px;
         font-weight: 600;
-        display: none; /* hidden by default */
+        display: none; 
     }
     .weak { color: #dc2626; }
     .medium { color: #d97706; }
@@ -151,7 +151,7 @@
         }
     }
 
-    // Live password strength checker
+   
     const passwordInput = document.getElementById("password");
     const strengthDisplay = document.getElementById("password-strength");
 
@@ -159,11 +159,11 @@
         const value = passwordInput.value;
 
         if (!value) {
-            strengthDisplay.style.display = "none"; // hide if empty
+            strengthDisplay.style.display = "none";
             return;
         }
 
-        strengthDisplay.style.display = "block"; // show only when typing
+        strengthDisplay.style.display = "block"; 
         let strength = 0;
 
         if (value.length >= 8) strength++;

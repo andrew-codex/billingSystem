@@ -15,9 +15,18 @@ use Carbon\Carbon;
 class OtpPasswordResetController extends Controller
 {
   
+public function showForgot()
+{
+    return view('auth.forgot-password');
+}
+
+public function showReset()
+{
+    return view('auth.reset-password');
+}
+
 public function requestOtp(Request $request)
 {
-    // Get email from input or session
     $email = $request->input('email') ?? session('reset_email');
 
     if (!$email) {
@@ -49,7 +58,7 @@ public function requestOtp(Request $request)
 
     Mail::to($email)->send(new SendOtpMail($otp));
 
-    session(['reset_email' => $email]); // update session
+    session(['reset_email' => $email]); 
 
     return redirect()->route('password.reset.form')->with([
         'success' => 'OTP sent successfully! Please check your email.',

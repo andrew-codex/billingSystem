@@ -1,200 +1,320 @@
-<script src="https://cdn.tailwindcss.com"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reset Password</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
 
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md transition-all">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Reset Password</h2>
+    body {
+      background-color: #f9fafb;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
 
-        {{-- OTP Sent Message --}}
-        <div id="otpSentMessage"
-             class="hidden bg-green-100 text-green-800 p-3 rounded mb-4 text-sm text-center animate-fadeIn">
-            We’ve sent a 6-digit OTP to your email — check your inbox!
-        </div>
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 2rem 2rem;
+      width: 100%;
+      max-width: 430px;
+    }
 
-        {{-- Validation Errors --}}
-        @if ($errors->any())
-            <div class="bg-red-100 text-red-800 p-3 rounded mb-4 text-sm">
-                <ul class="list-disc pl-5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    .icon-circle {
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #fff;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
 
-        {{-- Reset Password Form --}}
-        <form method="POST" action="{{ route('password.reset') }}" class="space-y-5" id="resetForm">
-            @csrf
-            <input type="hidden" name="email" value="{{ session('email') ?? old('email') }}">
+    h2 {
+      text-align: center;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
 
-        
-            <div>
-                <label for="otp" class="block font-semibold text-gray-700 mb-2">One-Time Password (OTP)</label>
-                <input type="text" name="otp" id="otp"
-                       class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="6-digit OTP" maxlength="6" required>
-            </div>
+    p {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
 
-       
-            <div>
-                <label for="password" class="block font-semibold text-gray-700 mb-2">New Password</label>
-                <input type="password" name="password" id="password"
-                       class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="Enter new password" required>
-                <div id="passwordErrors" class="mt-2 space-y-1 text-sm"></div>
-            </div>
+    .relative {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
 
-        
-            <div>
-                <label for="password_confirmation" class="block font-semibold text-gray-700 mb-2">Confirm Password</label>
-                <input type="password" name="password_confirmation" id="password_confirmation"
-                       class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="Re-enter new password" required>
-                <p id="matchMessage" class="text-xs mt-1 text-gray-500"></p>
-            </div>
+    .relative i {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
 
-            <button type="submit"
-                    class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
-                Reset Password
-            </button>
-        </form>
+    input[type="password"], input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 12px 38px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
 
-   
-        <div class="mt-4 text-center">
-            <button type="button" id="resendButton"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded transition cursor-not-allowed"
-                    disabled>
-                Resend OTP (<span id="countdown">0</span>s)
-            </button>
-        </div>
+    input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+      outline: none;
+    }
+
+    .toggle-btn {
+      position: absolute;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    .toggle-btn:hover { color: #4f46e5; }
+
+    .gradient-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      border: none;
+      color: #fff;
+      padding: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .gradient-btn:disabled {
+      background: #d1d5db;
+      cursor: not-allowed;
+    }
+
+    .gradient-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #6d28d9, #4f46e5);
+      box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+
+    .resend {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .resend button {
+      background: none;
+      border: none;
+      color: #4f46e5;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0;
+    }
+
+    .resend button:hover {
+      text-decoration: underline;
+    }
+
+    .resend button:disabled {
+      color: #9ca3af;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    #passwordErrors, #matchMessage , #otpError {
+      text-align: left;
+      font-size: 0.8rem;
+      margin-top: -2px;
+      margin-bottom: 8px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="icon-circle">
+      <i class="fas fa-lock"></i>
     </div>
-</div>
+    <h2>Reset Password</h2>
+    <p>Enter the OTP sent to your email and create a new password</p>
 
-<style>
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fadeIn { animation: fadeIn .4s ease-in-out; }
-</style>
+    <form method="POST" action="{{ route('password.reset') }}" id="resetForm">
+      @csrf
+      <input type="hidden" name="email" value="{{ session('reset_email') ?? old('email') }}">
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const countdownEl = document.getElementById('countdown');
-    const resendButton = document.getElementById('resendButton');
-    const otpSentMessage = document.getElementById('otpSentMessage');
+      <label><b>OTP</b></label>
+      <div class="relative">
+        <i class="fas fa-key"></i>
+        <input type="number" name="otp" id="otp" placeholder="Enter 6-digit OTP" required maxlength="6">
+      </div>
+      <p id="otpError" style="color:red;">
+  @error('otp') {{ $message }} @enderror
+</p>
+
+      <label><b>New Password</b></label>
+      <div class="relative">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password" id="password" placeholder="Enter new password" required>
+        <button type="button" id="togglePassword" class="toggle-btn"><i class="fas fa-eye"></i></button>
+      </div>
+      <p id="passwordErrors"></p>
+
+      <label><b>Confirm Password</b></label>
+      <div class="relative">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Re-enter new password" required>
+        <button type="button" id="toggleConfirm" class="toggle-btn"><i class="fas fa-eye"></i></button>
+      </div>
+      <p id="matchMessage"></p>
+
+      <button type="submit" class="gradient-btn" id="submitBtn" disabled>
+        <i class="fas fa-unlock-alt"></i> Reset Password
+      </button>
+    </form>
+
+    <div class="resend">
+      <form id="resendForm" method="POST" action="{{ route('password.resend.otp') }}">
+        @csrf
+        <input type="hidden" name="email" value="{{ session('reset_email') ?? old('email') }}">
+        <button type="button" id="resendButton"><span id="resendText">Resend OTP (60s)</span></button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
     const confirmInput = document.getElementById('password_confirmation');
     const passwordErrors = document.getElementById('passwordErrors');
     const matchMessage = document.getElementById('matchMessage');
-    const resetForm = document.getElementById('resetForm');
+    const otpInput = document.getElementById('otp');
+    const submitBtn = document.getElementById('submitBtn');
 
-    const DISABLE_SECS = 60;
-    let timerId = null;
-
-    // Password validation
-    function validatePassword(password) {
-        return [
-            { regex: /.{8,}/, text: 'At least 8 characters' },
-            { regex: /[A-Z]/, text: 'At least one uppercase letter (A-Z)' },
-            { regex: /[a-z]/, text: 'At least one lowercase letter (a-z)' },
-            { regex: /[0-9]/, text: 'At least one number (0-9)' },
-            { regex: /[@$!%*#?&]/, text: 'At least one special character (@$!%*#?&)' },
-        ];
-    }
+    const rules = [
+      { regex: /.{8,}/, text: "At least 8 characters" },
+      { regex: /[A-Z]/, text: "One uppercase letter" },
+      { regex: /[a-z]/, text: "One lowercase letter" },
+      { regex: /[0-9]/, text: "One number" },
+      { regex: /[@$!%*#?&]/, text: "One special character" }
+    ];
 
     function updatePasswordErrors(value) {
-        const rules = validatePassword(value);
-        passwordErrors.innerHTML = '';
-        rules.forEach(rule => {
-            const passed = rule.regex.test(value);
-            const line = document.createElement('div');
-            line.classList.add('flex', 'items-center', 'gap-2');
-            line.innerHTML = `
-                <span class="text-${passed ? 'green' : 'red'}-500 text-xs">${passed ? '✔' : '✖'}</span>
-                <span class="text-${passed ? 'green' : 'red'}-600 text-xs">${rule.text}</span>
-            `;
-            passwordErrors.appendChild(line);
-        });
+      if (!value) {
+        passwordErrors.textContent = '';
+        return false;
+      }
+      const passed = rules.every(r => r.regex.test(value));
+      passwordErrors.textContent = passed ? '✔ Strong password' : '✖ Weak password';
+      passwordErrors.style.color = passed ? 'green' : 'red';
+      return passed;
     }
-
-    passwordInput?.addEventListener('input', e => {
-        updatePasswordErrors(e.target.value);
-        checkMatch();
-    });
 
     function checkMatch() {
-        if (!confirmInput.value) { matchMessage.textContent = ''; return; }
-        if (passwordInput.value === confirmInput.value) {
-            matchMessage.textContent = 'Passwords match';
-            matchMessage.classList.add('text-green-600');
-            matchMessage.classList.remove('text-red-600');
-        } else {
-            matchMessage.textContent = 'Passwords do not match';
-            matchMessage.classList.add('text-red-600');
-            matchMessage.classList.remove('text-green-600');
-        }
-    }
-    confirmInput?.addEventListener('input', checkMatch);
-
-
-    function updateResendUI(remaining) {
-        countdownEl.textContent = remaining;
-        resendButton.disabled = remaining > 0;
-        resendButton.classList.toggle('cursor-not-allowed', remaining > 0);
-        resendButton.classList.toggle('bg-gray-300', remaining > 0);
-        resendButton.classList.toggle('text-gray-700', remaining > 0);
-        resendButton.classList.toggle('bg-indigo-600', remaining === 0);
-        resendButton.classList.toggle('text-white', remaining === 0);
+      if (!confirmInput.value) {
+        matchMessage.textContent = '';
+        return false;
+      }
+      const match = passwordInput.value === confirmInput.value;
+      matchMessage.textContent = match ? 'Passwords match' : 'Passwords do not match';
+      matchMessage.style.color = match ? 'green' : 'red';
+      return match;
     }
 
-    function startTimer(untilTs) {
-        clearInterval(timerId);
-        const tick = () => {
-            const remaining = Math.max(0, Math.ceil((untilTs - Date.now()) / 1000));
-            updateResendUI(remaining);
-            if (remaining <= 0) {
-                clearInterval(timerId);
-                localStorage.removeItem('otpUntil');
-            }
-        };
-        tick();
-        timerId = setInterval(tick, 1000);
+    function validateForm() {
+      const strong = updatePasswordErrors(passwordInput.value);
+      const match = checkMatch();
+      const otpValid = otpInput.value.length === 6;
+      submitBtn.disabled = !(strong && match && otpValid);
     }
 
-    // Load existing countdown
-    const storedUntil = parseInt(localStorage.getItem('otpUntil') || '0', 10);
-    if (storedUntil && storedUntil > Date.now()) {
-        startTimer(storedUntil);
-        otpSentMessage.classList.remove('hidden');
-    } else {
-        updateResendUI(0);
-    }
-
-   resendButton?.addEventListener('click', function() {
-    // Get email from hidden input in reset form
-    const emailInput = resetForm.querySelector('input[name="email"]');
-    const email = emailInput ? emailInput.value : null;
-
-    if (!email) return alert('Email is missing!');
-
-    const newUntil = Date.now() + DISABLE_SECS * 1000;
-    localStorage.setItem('otpUntil', String(newUntil));
-    localStorage.setItem('otpSent', '1');
-    otpSentMessage.classList.remove('hidden');
-    startTimer(newUntil);
-
-    // AJAX POST request to resend OTP
-    fetch("{{ route('password.request.otp') }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": resetForm.querySelector('input[name="_token"]').value
-        },
-        body: JSON.stringify({ email })
-    })
-    .then(res => res.json())
-    .then(data => console.log(data))
-    .catch(err => console.error(err));
+    passwordInput.addEventListener('input', validateForm);
+    confirmInput.addEventListener('input', validateForm);
+    otpInput.addEventListener('input', validateForm);
+otpInput.addEventListener('input', () => {
+  otpError.textContent = '';
+  otpError.style.color = '';
 });
 
-</script>
+    function toggleVisibility(btn, input) {
+      const icon = btn.querySelector('i');
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = "password";
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+    document.getElementById('togglePassword').addEventListener('click', e => toggleVisibility(e.currentTarget, passwordInput));
+    document.getElementById('toggleConfirm').addEventListener('click', e => toggleVisibility(e.currentTarget, confirmInput));
+
+   
+    const resendButton = document.getElementById('resendButton');
+    const resendText = document.getElementById('resendText');
+    const resendForm = document.getElementById('resendForm');
+    const DISABLE_SECS = 60;
+    const STORAGE_KEY = "resendOtpEndTime";
+
+    let resendEndTime = localStorage.getItem(STORAGE_KEY);
+    if (!resendEndTime || Date.now() > resendEndTime) {
+      resendEndTime = Date.now() + DISABLE_SECS * 1000;
+      localStorage.setItem(STORAGE_KEY, resendEndTime);
+    } else {
+      resendEndTime = parseInt(resendEndTime);
+    }
+
+    function updateCountdown() {
+      const remaining = Math.max(0, Math.floor((resendEndTime - Date.now()) / 1000));
+      resendText.textContent = remaining > 0 ? `Resend OTP (${remaining}s)` : "Resend OTP";
+      resendButton.disabled = remaining > 0;
+      if (remaining <= 0) localStorage.removeItem(STORAGE_KEY);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    resendButton.addEventListener('click', () => {
+      resendEndTime = Date.now() + DISABLE_SECS * 1000;
+      localStorage.setItem(STORAGE_KEY, resendEndTime);
+      updateCountdown();
+      resendForm.submit();
+    });
+  });
+  </script>
+</body>
+</html>
