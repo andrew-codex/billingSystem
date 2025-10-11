@@ -14,14 +14,14 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
            User::firstOrCreate(
-            ['email' => 'Admin@gmail.com'], // unique check
+            ['email' => 'Admin@gmail.com'], 
             [
                 'name' => 'System Admin',
-                'password' => Hash::make('Admin@112203'), // your chosen password
+                'password' => Hash::make('Admin@112203'), 
                 'role' => 'admin',
                 'status' => 'active',
                 'archived' => false,
-                'must_change_password' => false, // ✅ admin will NOT be forced to change password
+                'must_change_password' => false,
             ]
         );
     }

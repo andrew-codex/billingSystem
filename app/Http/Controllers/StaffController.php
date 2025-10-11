@@ -32,7 +32,7 @@ public function index(Request $request)
         }))
         ->orderByDesc('created_at');
 
-    $users = $query->paginate(2, ['*'], 'page_main');
+    $users = $query->paginate(10, ['*'], 'page_main');
 
     $cities    = json_decode(file_get_contents(public_path('json/city.json')), true);
     $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
@@ -48,7 +48,7 @@ public function index(Request $request)
     $archivedUsers = User::where('archived', 1)
         ->where('role', 'staff')
         ->orderByDesc('created_at')
-        ->paginate(2, ['*'], 'page_archive');
+        ->paginate(10, ['*'], 'page_archive');
 
     if ($request->ajax()) {
         $html = view('pages.staffManagement', compact('users', 'archivedUsers'))->render();
@@ -58,17 +58,7 @@ public function index(Request $request)
     return view('pages.staffManagement', compact('users', 'archivedUsers'));
 }
 
-
-
-
-
-
-
-
-
-
-
-    
+ 
 
 public function storeStaff(Request $request)
 {
@@ -89,7 +79,6 @@ public function storeStaff(Request $request)
 
     $plainPassword = Str::random(8);
 
- 
     $user = User::create([
         'first_name'          => $request->first_name,
         'last_name'  => $request->last_name,
@@ -138,8 +127,6 @@ public function checkEmail(Request $request)
 
 
 
-
-
 public function update(Request $request, $id)
 {
     $user = User::findOrFail($id);
@@ -167,8 +154,6 @@ public function update(Request $request, $id)
     $cities = json_decode(file_get_contents(public_path('json/city.json')), true);
     $barangays = json_decode(file_get_contents(public_path('json/barangay.json')), true);
 
-   
-
     $city_code = $request->city_code;
     $city_name = collect($cities)->firstWhere('city_code', $city_code)['city_name'] ?? null;
 
@@ -177,9 +162,9 @@ public function update(Request $request, $id)
 
     
     $user->first_name = $validatedData['first_name'];
-     $user->last_name = $validatedData['last_name'];
-      $user->middle_name = $validatedData['middle_name'];
-        $user->suffix = $validatedData['suffix'];
+    $user->last_name = $validatedData['last_name'];
+    $user->middle_name = $validatedData['middle_name'];
+    $user->suffix = $validatedData['suffix'];
     $user->email = $validatedData['email'];
     $user->phone = $validatedData['phone'] ?? $user->phone;
     $user->city_code = $request->city_code;
@@ -187,17 +172,10 @@ public function update(Request $request, $id)
     $user->barangay_code = $request->barangay_code;
     $user->barangay_name = $request->barangay_name;
     $user->role = $validatedData['role'];
-
- 
-
-
     $user->save();
-    
 
     return redirect()->route('staff.index')->with('success', 'Staff updated successfully.');
 }
-
-
 
 
 
@@ -210,17 +188,14 @@ protected function authenticated(Request $request, $user)
         ->delete();
 }
 
-
 public function getArchivedStaff()
 {
     $archivedUsers = User::where('archived', 1)
                          ->orderByDesc('updated_at')
-                         ->paginated(3);
+                         ->paginated(10);
 
     return response()->json($archivedUsers);
 }
-
-
 
 
 public function toggleStatus(Request $request, $id)
@@ -249,11 +224,6 @@ public function archive($id)
   
     return redirect()->back()->with('success', 'User archived successfully!');
 }
-
-
-
-
-
 
 
 public function restore($id)

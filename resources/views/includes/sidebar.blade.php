@@ -18,48 +18,60 @@
                 <i class="fa-solid fa-house"></i> <span>Dashboard</span> 
             </a>
         </li>
-
+@if(hasPermission('manage_consumers'))
         <li>
             <a href="{{ route('consumer.index') }}" 
                class="fade-link {{ request()->routeIs('consumer.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-users-gear"></i> <span>Consumer & Electric Meter Management</span> 
             </a>
         </li>
+  @endif
 
+
+       @if(hasPermission('manage_staff'))
         <li>
             <a href="{{ route('staff.index') }}" 
                class="fade-link {{ request()->routeIs('staff.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-user-tie"></i> <span>Staff Management</span> 
             </a>
         </li>
+        @endif
+    
 
+    
+@if(hasPermission('manage_billing'))
         <li>
             <a href="" 
                class="fade-link {{ request()->routeIs('') ? 'active' : '' }}">
                 <i class="fa-solid fa-file-invoice-dollar"></i> <span>Billing Management</span>
             </a>
         </li>
+        @endif
 
+@if(hasPermission('manage_reconnection'))
         <li>
             <a href="{{route('reconnection.index')}}" 
                class="fade-link {{ request()->routeIs('reconnection.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-user-check"></i> <span>Reconnection & Lineman Assignment</span> 
             </a>
         </li>
-
+        @endif
+@if(hasPermission('manage_brownout'))
         <li>
             <a href="{{route('BrownoutScheduling.index')}}" 
                class="fade-link {{ request()->routeIs('BrownoutScheduling.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-calendar"></i> <span>Brownout Scheduling</span> 
             </a>
         </li>
-
+        @endif
+@if(hasPermission('manage_brownout'))
         <li>
             <a href="{{ route('electricMeter.index') }}" 
                class="fade-link {{ request()->routeIs('electricMeter.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-layer-group"></i> <span>Electric Meter Inventory</span> 
             </a>
         </li>
+        @endif
 
         <li class="logout">
             <a  href=""

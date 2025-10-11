@@ -38,6 +38,7 @@
 
                     
                         <div class="roles-wrapper">
+                            @if(hasPermission('manage_roles'))
                             <a href="javascript:void(0);" class="roles-toggle">
                             <i class="fa-solid fa-users-gear"></i> Edit Permissions
                             <span class="arrow">▾</span>
@@ -46,6 +47,7 @@
                             <li><a href="{{ route('permissions.edit', 'admin') }}">Edit Admin</a></li>
                             <li><a href="{{ route('permissions.edit', 'staff') }}">Edit Staff</a></li>
                             </ul>
+                            @endif
                         </div>
 
                         <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>

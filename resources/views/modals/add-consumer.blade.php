@@ -149,7 +149,9 @@
                 </div>
 
                 <div class="form-actions">
+                    @if(hasPermission('create_consumers'))
                     <button type="submit" class="btn btn-primary">Add Consumer</button>
+@endif
                 </div>
             </form>
         </div>

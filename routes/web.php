@@ -28,6 +28,8 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
         Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+        Route::post('/check-email', [ConsumerController::class, 'checkEmail'])->name('check.email');
+        Route::get('/staff/check-email', [StaffController::class, 'checkEmail'])->name('staff.checkEmail');
 
         Route::get('/password/forgot', [OtpPasswordResetController::class, 'showForgot'])
         ->name('password.forgot');
@@ -48,12 +50,15 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
 
                 Route::get('/password/change', [PasswordController::class, 'showChangeForm'])->name('password.change');
                 Route::post('/password/change', [PasswordController::class, 'update'])->name('password.change.update');
+ 
+                Route::middleware(['auth', 'force.password.change'])->group(function () {
+
+                Route::middleware(['check.permission'])->group(function () {
+                                          Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
                 Route::get('/permissions/{role}/edit', [RolePermissionController::class, 'edit'])->name('permissions.edit');
                 Route::put('/permissions/{role}/update', [RolePermissionController::class, 'update'])->name('permissions.update');
-                
-        Route::middleware(['auth', 'force.password.change'])->group(function () {
-                Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
-
+              
+              
                 Route::get('/consumerIndex',[ConsumerController::class, 'index'])->name('consumer.index');
 
                 Route::get('/staffIndex',[StaffController::class, 'index'])->name('staff.index');
@@ -63,8 +68,7 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
                 Route::put('/staffUpdate/{id}', [StaffController::class, 'update'])->name('staff.update');
                 Route::get('/staff/search',[StaffController::class, 'search'])->name('staff.search');
 
-                Route::get('/staff/check-email', [StaffController::class, 'checkEmail'])->name('staff.checkEmail');
-
+      
 
                 Route::patch('/staff/toggle-status/{id}', [StaffController::class, 'toggleStatus'])->name('staff.toggleStatus');
                 Route::patch('/staff/archive/{id}', [StaffController::class, 'archive'])->name('staff.archive');
@@ -79,7 +83,7 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
                 Route::delete('/destroy/{id}', [StaffController::class, 'destroy'])->name('users.destroy');
 
                 Route::post('/bulkRestore', [StaffController::class, 'bulkRestore'])->name('users.bulkRestore');
-                Route::delete('/bulkDelete', [StaffController::class, 'bulkDelete'])->name('users.bulkDelete');
+                Route::post('/bulkDelete', [StaffController::class, 'bulkDelete'])->name('users.bulkDelete');
 
 
                 Route::post('/addConsumer',[ConsumerController::class,'store'])->name('consumers.store');
@@ -108,8 +112,7 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
         
 
 
-                Route::post('/check-email', [ConsumerController::class, 'checkEmail'])->name('check.email');
-
+   
 
 
                 Route::get('/electricMeter', [ElectricMeterController::class, 'index'])->name('electricMeter.index');
@@ -155,5 +158,5 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
 
 
         });
-
+   });
 

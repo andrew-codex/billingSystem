@@ -17,6 +17,7 @@
                 'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
             
             'force.password.change' => \App\Http\Middleware\ForcePasswordChange::class,
+             'check.permission' => \App\Http\Middleware\CheckPermission::class,
             ]);
         })
         ->withExceptions(function (Exceptions $exceptions): void {

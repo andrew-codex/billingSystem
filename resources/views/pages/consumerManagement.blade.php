@@ -29,7 +29,10 @@
         </a>
            
         </h2>
+    
+
         <button  onclick="openAddConsumer()"> <i class="fa-solid fa-plus"></i> Add New Consumer</button>
+
     </header>
  
 

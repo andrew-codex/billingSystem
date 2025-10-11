@@ -9,17 +9,23 @@ class RolePermissionController extends Controller
     public function edit($role)
 {
     $permissions = [
-        'manage_staff',
-        'manage_roles',
-        'manage_bills',
-        'approve_payments',
-        'view_reports',
-        'export_reports',
-        'system_settings',
-        'create_bills',
-        'edit_bills',
-        'record_payments',
-        'view_customers'
+    'view_dashboard',
+
+    'manage_consumers',
+    'create_consumers',
+
+    'manage_staff',
+
+    'manage_billings',
+
+    'manage_reconnection',
+
+    'manage_brownout',
+
+    'manage_inventory',
+
+    'manage_roles',
+     
     ];
 
     $rolePermission = RolePermission::where('role', $role)->first();
