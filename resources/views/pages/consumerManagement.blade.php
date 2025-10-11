@@ -10,7 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/philippine-address-selector@latest/dist/philippine-address-selector.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{{ asset('/JsFiles/ph-address-selector.js') }}"></script>
-        <link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/consumer.css')}}">
+<link rel="stylesheet" href="{{asset('/CSS_Styles/mainCss/consumer.css')}}">
     <title>Consumer & Account Management</title>
 </head>
 <body>

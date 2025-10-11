@@ -29,7 +29,7 @@ if (!function_exists('getPermissionFromRoute')) {
 
             'dashboard.index' => 'view_dashboard',
 
-            'billing.index' => 'manage_billing',
+            'billing.index' => 'manage_billings',
       
             'consumer.index' => 'manage_consumers',
             'consumer.create' => 'create_consumers',

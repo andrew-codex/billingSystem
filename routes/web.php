@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\CustomForgotPasswordController;
 use App\Http\Controllers\Auth\CustomResetPasswordController;
 use App\Http\Controllers\GroupNameController;
 use App\Http\Controllers\Auth\OtpPasswordResetController;
+use App\Http\Controllers\BillingController;
 
 
 
@@ -155,7 +156,8 @@ use App\Http\Controllers\Auth\OtpPasswordResetController;
                 Route::post('/groups', [GroupNameController::class, 'storeGroup'])->name('groups.store');
                 Route::put('/groups/{group}/update', [GroupNameController::class, 'updateGroup'])->name('groups.update');
                 Route::delete('/groups/{group}', [GroupNameController::class, 'destroyGroup'])->name('groups.destroyGroup');
-
+                
+                Route::get('/billingManagement', [BillingController::class, 'index'])->name('billing.index');
 
         });
    });

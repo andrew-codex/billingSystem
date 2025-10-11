@@ -2,13 +2,13 @@
 
 return [
     'view_dashboard',
-    'view_consumers',
+    'manage_consumers',
     'create_consumers',
-    'view_staff',
-    'view_billing',
-    'view_reconnection',
-    'view_brownout',
-    'view_inventory',
-    'view_roles',
+    'manage_staff',
+    'manage_billings',
+    'manage_reconnection',
+    'manage_brownout',
+    'manage_inventory',
+    'manage_roles',
 
 ];

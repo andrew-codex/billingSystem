@@ -39,10 +39,10 @@
     
 
     
-@if(hasPermission('manage_billing'))
+@if(hasPermission('manage_billings'))
         <li>
-            <a href="" 
-               class="fade-link {{ request()->routeIs('') ? 'active' : '' }}">
+            <a href="{{route('billing.index')}}" 
+               class="fade-link {{ request()->routeIs('billing.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-file-invoice-dollar"></i> <span>Billing Management</span>
             </a>
         </li>
